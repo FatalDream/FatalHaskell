@@ -62,7 +62,7 @@
   <ItemGroup>
     <None Include="FatalHaskell.fhsproj" />
     <None Include="FatalHaskell.ico" />
-    <None Include="Program.cs" />
+    <None Include="Main.hs" />
     <None Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

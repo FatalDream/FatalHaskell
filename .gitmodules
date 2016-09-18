@@ -1,0 +1,3 @@
+[submodule "FatalHaskell/intero"]
+	path = FatalHaskell/intero
+	url = https://github.com/commercialhaskell/intero

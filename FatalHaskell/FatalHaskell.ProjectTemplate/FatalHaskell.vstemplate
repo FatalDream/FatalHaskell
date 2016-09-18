@@ -18,8 +18,8 @@
       These are the items which will show up when a new project is created using the custom project system.
       Items referenced in here must also be referenced in the project file.
       -->
-      <ProjectItem TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
-      <ProjectItem OpenInEditor="true" ReplaceParameters="true">Program.cs</ProjectItem>
+      <!--<ProjectItem TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>-->
+      <ProjectItem OpenInEditor="true" ReplaceParameters="true">Main.hs</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>
