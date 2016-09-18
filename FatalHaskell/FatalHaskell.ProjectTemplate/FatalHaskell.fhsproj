@@ -30,9 +30,19 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Main.hs">
+    <Compile Include="app\Main.hs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\Lib.hs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test\Spec.hs">
+      <SubType>Code</SubType>
+    </Compile>
+    <None Include="project.cabal"></None>
+    <None Include="Setup.hs"></None>
+    <None Include="stack.yaml"></None>
+    <None Include="LICENSE"></None>
   </ItemGroup>
 
   <Import Project="$(CustomProjectExtensionsPath)CustomProjectCs.targets" />

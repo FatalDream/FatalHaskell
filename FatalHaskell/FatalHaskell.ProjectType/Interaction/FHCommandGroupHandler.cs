@@ -3,6 +3,8 @@ using System.Collections.Immutable;
 using System.Windows;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
+using FatalHaskell.FHBuildSystem;
+using System.ComponentModel.Composition;
 
 namespace FatalHaskell.Interaction
 {
@@ -15,6 +17,10 @@ namespace FatalHaskell.Interaction
     [AppliesTo(MyUnconfiguredProject.UniqueCapability)]
     internal class FHCommandGroupHandler : ICommandGroupHandler
     {
+
+        [Import(typeof(IBuilder))]
+        IBuilder Builder;
+
         /// <summary>
         /// Check if a specific command is supported and enabled.
         /// </summary>
@@ -73,6 +79,7 @@ namespace FatalHaskell.Interaction
 
                 case VSConstants.VSStd97CmdID.Start:
                     MessageBox.Show("Started!");
+                    Builder.Build();
                     result = true;
                     break;
             }

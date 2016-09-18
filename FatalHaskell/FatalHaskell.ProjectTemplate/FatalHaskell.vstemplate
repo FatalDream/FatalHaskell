@@ -19,7 +19,13 @@
       Items referenced in here must also be referenced in the project file.
       -->
       <!--<ProjectItem TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>-->
-      <ProjectItem OpenInEditor="true" ReplaceParameters="true">Main.hs</ProjectItem>
+      <ProjectItem OpenInEditor="true">app\Main.hs</ProjectItem>
+      <ProjectItem OpenInEditor="true">src\Lib.hs</ProjectItem>
+      <ProjectItem>test\Spec.hs</ProjectItem>
+      <ProjectItem OpenInEditor="true" ReplaceParameters="true">stack.yaml</ProjectItem>
+      <ProjectItem>Setup.hs</ProjectItem>
+      <ProjectItem ReplaceParameters="true">project.cabal</ProjectItem>
+      <ProjectItem ReplaceParameters="true">LICENSE</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>

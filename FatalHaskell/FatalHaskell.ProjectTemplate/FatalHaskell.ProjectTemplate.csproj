@@ -60,15 +60,27 @@
   remove files here, you must also reference them in the ProjectTemplateTemplate.vstemplate file.
   -->
   <ItemGroup>
-    <None Include="FatalHaskell.fhsproj" />
+    <None Include="FatalHaskell.fhsproj">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="FatalHaskell.ico" />
     <None Include="Main.hs" />
     <None Include="AssemblyInfo.cs" />
+    <None Include="app\Main.hs" />
+    <None Include="project.cabal" />
+    <None Include="Setup.hs" />
+    <None Include="src\Lib.hs" />
+    <None Include="stack.yaml" />
+    <None Include="LICENSE" />
+    <None Include="test\Spec.hs" />
   </ItemGroup>
   <ItemGroup>
     <VSTemplate Include="FatalHaskell.vstemplate">
       <SubType>Designer</SubType>
     </VSTemplate>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
