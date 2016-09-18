@@ -7,6 +7,7 @@ using Bearded.Monads;
 using FatalIDE.Core;
 using System.IO;
 using System.Windows;
+using System.Diagnostics;
 
 namespace FatalHaskell.External
 {
@@ -33,13 +34,15 @@ namespace FatalHaskell.External
 
         private static EitherSuccessOrError<FHIntero,Error<String>> StartInternal(FHIntero intero, String projectDir)
         {
-            return Communication.StartProcess(
+            return Communication.StartNewProcess(
                    "stack", "ghci --with-ghc intero",
-                   ProjectTree.GetDirWithFile(projectDir, "stack.yaml"),
-                   intero.OnReceiveResponse,
-                   intero.OnReceiveError,
-                    () => StartInternal(intero, projectDir))
-                 .Select(writer => intero.Initialize(writer));
+                   ProjectTree.GetDirWithFile(projectDir, "stack.yaml"))
+                 .WhenSuccess(p =>
+                 {
+                     p.StandardInput.WriteLine(":set prompt >");
+                     ReadAll(p);
+                 })
+                 .Select(p => intero.Initialize(p));
         }
 
         private FHIntero() { }
@@ -57,9 +60,11 @@ namespace FatalHaskell.External
 
         private ErrorContainer RustcErrors;
 
-        private FHIntero Initialize(Action<String> CommandWriter)
+        private Process CurrentProcess;
+
+        private FHIntero Initialize(Process CurrentProcess)
         {
-            this.CommandWriter = CommandWriter;
+            this.CurrentProcess = CurrentProcess;
             this.ResponseSource = null;
             this.PartialResponses = new List<String>();
             this.RustcErrors = new ErrorContainer();
@@ -69,29 +74,49 @@ namespace FatalHaskell.External
         public async Task<List<String>> GetCompletions()
         {
             ResponseSource = new TaskCompletionSource<List<String>>();
-            CommandWriter("get");
+            CurrentProcess.StandardInput.WriteLine("get");
             return await ResponseSource.Task;
         }
 
-        public async Task<List<String>> UpdateAndGetCompletions(String filename, String contents)
+        public List<String> UpdateAndGetCompletions(String filename, String contents)
         {
             RustcErrors.Errors.Clear();
 
             ResponseSource = new TaskCompletionSource<List<String>>();
-            CommandWriter("update");
-            CommandWriter(filename);
-            CommandWriter(contents);
-            CommandWriter((char)26 + "");
-            await ResponseSource.Task;
+            CurrentProcess.StandardInput.WriteLine(":r");
 
-            ErrorsChanged?.Invoke(RustcErrors);
-            return await GetCompletions();
+
+            return ReadAll(CurrentProcess);
+
+            //CommandWriter("update");
+            //CommandWriter(filename);
+            //CommandWriter(contents);
+            //CommandWriter((char)26 + "");
+
+            //ErrorsChanged?.Invoke(RustcErrors);
+            ////return await GetCompletions();
+            //return new string[] { "comp1", "comp2", "hello" }.ToList();
+        }
+
+        private static List<String> ReadAll(Process p)
+        {
+            String result = "";
+            while (true)
+            {
+                char c = (char)p.StandardOutput.Read();
+                if (c == '>')
+                    break;
+                else
+                    result += c;
+            }
+            p.StandardOutput.Read();
+            return result.Split('\n').ToList();
         }
 
 
         private void OnReceiveResponse(String response)
         {
-            if (response.Contains(">"))
+            if (response.Contains("Collecting type info"))
             {
                 ResponseSource?.TrySetResult(PartialResponses);
                 PartialResponses = new List<String>();

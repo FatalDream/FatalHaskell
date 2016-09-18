@@ -58,7 +58,7 @@ namespace FatalIDE.Core
                 p.Start();
 
                 p.OutputDataReceived += (o, a) => { if (a.Data != null) StdHandler(a.Data); };
-                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
                 p.ErrorDataReceived += (o, a) => { if (a.Data != null) ErrHandler(a.Data); };
                 p.BeginErrorReadLine();
                 p.Exited += (s, e) => ExitHandler();
@@ -68,6 +68,39 @@ namespace FatalIDE.Core
             catch (Exception e)
             {
                 return EitherSuccessOrError<Action<String>, Error<String>>.Create(
+                    new Error<String>("When trying to call " + filename
+                                    + "at location '" + workingDirectory
+                                    + "': " + e.Message));
+            }
+        }
+
+        public static EitherSuccessOrError<Process, Error<String>> StartNewProcess(
+            String filename,
+            String arguments,
+            String workingDirectory)
+        {
+            try
+            {
+                var p = new Process();
+                p.StartInfo = new ProcessStartInfo
+                {
+                    FileName = filename,
+                    Arguments = arguments,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    CreateNoWindow = true,
+                    WorkingDirectory = workingDirectory,
+                };
+
+                p.Start();
+
+                return EitherSuccessOrError<Process, Error<String>>.Create(p);
+            }
+            catch (Exception e)
+            {
+                return EitherSuccessOrError<Process, Error<String>>.Create(
                     new Error<String>("When trying to call " + filename
                                     + "at location '" + workingDirectory
                                     + "': " + e.Message));

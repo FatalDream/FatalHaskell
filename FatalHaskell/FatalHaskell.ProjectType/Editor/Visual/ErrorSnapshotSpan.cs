@@ -13,7 +13,7 @@ using System.Windows.Media;
 using Bearded.Monads;
 using Microsoft.VisualStudio.Text.Adornments;
 
-namespace FatalHaskell.Editor.Visual
+namespace FatalHaskell.Editor
 {
     class ErrorSnapshotSpan
     {

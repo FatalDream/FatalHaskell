@@ -13,7 +13,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.ProjectSystem;
 using System.IO;
 
-namespace FatalHaskell.Editor.Visual
+namespace FatalHaskell.Editor
 {
     [Export(typeof(IViewTaggerProvider))]
     [ContentType("hs")]

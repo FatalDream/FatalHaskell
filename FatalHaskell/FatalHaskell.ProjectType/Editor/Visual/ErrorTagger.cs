@@ -14,7 +14,7 @@ using FatalHaskell.External;
 using Bearded.Monads;
 using Microsoft.VisualStudio.Text.Adornments;
 
-namespace FatalHaskell.Editor.Visual
+namespace FatalHaskell.Editor
 {
 
     internal sealed class ErrorTagger : ITagger<ErrorTag>

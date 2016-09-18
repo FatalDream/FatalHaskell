@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
-namespace FatalHaskell.Editor.Core
+namespace FatalHaskell.Editor
 {
     internal static class FileAndContentTypeDefinitions
     {

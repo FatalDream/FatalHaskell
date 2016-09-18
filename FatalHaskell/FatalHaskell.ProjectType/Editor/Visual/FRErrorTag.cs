@@ -13,7 +13,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.TextManager.Interop;
 
-namespace FatalHaskell.Editor.Visual
+namespace FatalHaskell.Editor
 {
     class FRErrorTag : ErrorTag
     {
