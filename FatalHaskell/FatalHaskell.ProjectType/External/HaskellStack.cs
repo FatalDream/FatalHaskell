@@ -37,7 +37,7 @@ namespace FatalHaskell.External
         #region Commands
         public void Build(String pathToProject, ILogger l)
         {
-            Communication.StartProcess("stack", "build", pathToProject, s => l.WriteMessage(s), err => l.WriteMessage(err));
+            Communication.StartProcess("stack", "build", pathToProject, s => l.WriteMessage(s), err => l.WriteMessage(err), () => { return; });
         }
 
         #endregion Commands

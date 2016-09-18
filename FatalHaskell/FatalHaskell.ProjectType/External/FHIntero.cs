@@ -21,13 +21,7 @@ namespace FatalHaskell.External
             {
                 FHIntero intero = new FHIntero();
 
-                return Communication.StartProcess(
-                    "stack", "ghci --with-ghc intero",
-                    ProjectTree.GetDirWithFile(projectDir, "stack.yaml"),
-                    intero.OnReceiveResponse,
-                    intero.OnReceiveError)
-                    .Select(writer => intero.Initialize(writer))
-
+                return StartInternal(intero, projectDir)
                     .WhenSuccess(index => Singleton = index)
                     .WhenError(err => MessageBox.Show(err.ToString()));
             }
@@ -35,6 +29,17 @@ namespace FatalHaskell.External
             {
                 return EitherSuccessOrError<FHIntero, Error<String>>.Create(Singleton);
             }
+        }
+
+        private static EitherSuccessOrError<FHIntero,Error<String>> StartInternal(FHIntero intero, String projectDir)
+        {
+            return Communication.StartProcess(
+                   "stack", "ghci --with-ghc intero",
+                   ProjectTree.GetDirWithFile(projectDir, "stack.yaml"),
+                   intero.OnReceiveResponse,
+                   intero.OnReceiveError,
+                    () => StartInternal(intero, projectDir))
+                 .Select(writer => intero.Initialize(writer));
         }
 
         private FHIntero() { }

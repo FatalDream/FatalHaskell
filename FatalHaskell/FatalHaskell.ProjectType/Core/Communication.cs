@@ -37,7 +37,8 @@ namespace FatalIDE.Core
             String arguments,
             String workingDirectory,
             Action<String> StdHandler,
-            Action<String> ErrHandler)
+            Action<String> ErrHandler,
+            Action ExitHandler)
         {
             try
             {
@@ -60,6 +61,7 @@ namespace FatalIDE.Core
                 p.BeginOutputReadLine();
                 p.ErrorDataReceived += (o, a) => { if (a.Data != null) ErrHandler(a.Data); };
                 p.BeginErrorReadLine();
+                p.Exited += (s, e) => ExitHandler();
 
                 return EitherSuccessOrError<Action<String>, Error<String>>.Create(s => p.StandardInput.WriteLine(s));
             }
