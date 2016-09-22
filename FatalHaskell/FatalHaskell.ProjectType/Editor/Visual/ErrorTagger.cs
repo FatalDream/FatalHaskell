@@ -42,7 +42,7 @@ namespace FatalHaskell.Editor
             this._view.LayoutChanged += ViewLayoutChanged;
             _filename = filename;
             //_errorSpans = new List<ErrorSnapshotSpan>();
-            FHIntero.Instance(filename).WhenSuccess(i => i.ErrorsChanged += On_ErrorsChanged);
+            FHIntero.Instance(filename).WhenSuccess(i => i.Errors.ErrorsChanged += On_ErrorsChanged);
         }
 
         private void On_ErrorsChanged(ErrorContainer obj)
@@ -65,8 +65,8 @@ namespace FatalHaskell.Editor
             //}
 
             _errorContainer = obj;
-
             
+            TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(_sourceBuffer.CurrentSnapshot, 0, _sourceBuffer.CurrentSnapshot.Length)));
         }
 
         void ViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
@@ -135,29 +135,32 @@ namespace FatalHaskell.Editor
             NormalizedSnapshotSpanCollection errorSpanCollection = new NormalizedSnapshotSpanCollection(errorSpans);
 
 
-            foreach (SnapshotSpan span in NormalizedSnapshotSpanCollection.Overlap(spans, errorSpanCollection))
-            {
-                yield return new TagSpan<ErrorTag>(span, new ErrorTag(PredefinedErrorTypeNames.SyntaxError, "well, here should be your message..." /*error.messages[0]*/));
-            }
-
-            //foreach (var error in errors)
+            //foreach (SnapshotSpan span in NormalizedSnapshotSpanCollection.Overlap(spans, errorSpanCollection))
             //{
-            //    foreach (var span in spans)
-            //    {
-            //        //SnapshotPoint end = start.Add(3);
-            //        //SnapshotSpan errorSpan = new SnapshotSpan(start, end);
-
-            //        if (span.IntersectsWith(errorSpan))
-            //        {
-            //            if (span.Snapshot != errorSpan.Snapshot)
-            //            {
-            //                errorSpan = errorSpan.TranslateTo(span.Snapshot, SpanTrackingMode.EdgeInclusive);
-            //            }
-
-            //            yield return new TagSpan<ErrorTag>(errorSpan, new ErrorTag(PredefinedErrorTypeNames.SyntaxError, error.messages[0]));
-            //        }
-            //    }
+            //    yield return new TagSpan<ErrorTag>(span, new ErrorTag(PredefinedErrorTypeNames.SyntaxError, "well, here should be your message..." /*error.messages[0]*/));
             //}
+
+            foreach (var error in errors)
+            {
+                foreach (var span in spans)
+                {
+                    SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.column - 1);
+
+                    ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
+                    SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
+
+
+                    if (span.IntersectsWith(errorSpan))
+                    {
+                        //if (span.Snapshot != errorSpan.Snapshot)
+                        //{
+                        //    errorSpan = errorSpan.TranslateTo(span.Snapshot, SpanTrackingMode.EdgeInclusive);
+                        //}
+
+                        yield return new TagSpan<ErrorTag>(errorSpan, new ErrorTag(PredefinedErrorTypeNames.SyntaxError, error.messages[0]));
+                    }
+                }
+            }
 
             //foreach (var span in spans)
             //{

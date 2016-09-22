@@ -55,9 +55,8 @@ namespace FatalHaskell.External
 
 
 
-        public event Action<ErrorContainer> ErrorsChanged;
 
-        private ErrorContainer Errors;
+        public ErrorContainer Errors;
 
         private Process CurrentProcess;
 
@@ -84,7 +83,6 @@ namespace FatalHaskell.External
             Errors.Clear();
             CurrentProcess.StandardInput.WriteLine(request);
             List<String> response = ReadAll();
-            ErrorsChanged?.Invoke(Errors);
             return response;
         }
 

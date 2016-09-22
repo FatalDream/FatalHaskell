@@ -10,10 +10,12 @@ using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using System.Windows.Media;
+using FatalHaskell.External;
+using Bearded.Monads;
 
 namespace FatalHaskell.Editor.Highlight
 {
-    internal class HighlightWordTagger : ITagger<ErrorTag>
+    internal class HighlightWordTagger : ITagger<HighlightWordTag>
     {
         ITextView View { get; set; }
         ITextBuffer SourceBuffer { get; set; }
@@ -26,8 +28,10 @@ namespace FatalHaskell.Editor.Highlight
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
+        ErrorContainer errorContainer;
+
         public HighlightWordTagger(ITextView view, ITextBuffer sourceBuffer, ITextSearchService textSearchService,
-            ITextStructureNavigator textStructureNavigator)
+            ITextStructureNavigator textStructureNavigator, String filename)
         {
             this.View = view;
             this.SourceBuffer = sourceBuffer;
@@ -37,6 +41,14 @@ namespace FatalHaskell.Editor.Highlight
             this.CurrentWord = null;
             this.View.Caret.PositionChanged += CaretPositionChanged;
             this.View.LayoutChanged += ViewLayoutChanged;
+
+            FHIntero.Instance(filename).WhenSuccess(i => i.Errors.ErrorsChanged += On_ErrorsChanged);
+        }
+
+        private void On_ErrorsChanged(ErrorContainer obj)
+        {
+            errorContainer = obj;
+            UpdateWordAdornments();
         }
 
         void ViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
@@ -77,52 +89,78 @@ namespace FatalHaskell.Editor.Highlight
         {
             SnapshotPoint currentRequest = RequestedPoint;
             List<SnapshotSpan> wordSpans = new List<SnapshotSpan>();
-            //Find all words in the buffer like the one the caret is on
-            TextExtent word = TextStructureNavigator.GetExtentOfWord(currentRequest);
-            bool foundWord = true;
-            //If we've selected something not worth highlighting, we might have missed a "word" by a little bit
-            if (!WordExtentIsValid(currentRequest, word))
-            {
-                //Before we retry, make sure it is worthwhile 
-                if (word.Span.Start != currentRequest
-                     || currentRequest == currentRequest.GetContainingLine().Start
-                     || char.IsWhiteSpace((currentRequest - 1).GetChar()))
-                {
-                    foundWord = false;
-                }
-                else
-                {
-                    // Try again, one character previous.  
-                    //If the caret is at the end of a word, pick up the word.
-                    word = TextStructureNavigator.GetExtentOfWord(currentRequest - 1);
+            ////Find all words in the buffer like the one the caret is on
+            //TextExtent word = TextStructureNavigator.GetExtentOfWord(currentRequest);
+            //bool foundWord = true;
+            ////If we've selected something not worth highlighting, we might have missed a "word" by a little bit
+            //if (!WordExtentIsValid(currentRequest, word))
+            //{
+            //    //Before we retry, make sure it is worthwhile 
+            //    if (word.Span.Start != currentRequest
+            //         || currentRequest == currentRequest.GetContainingLine().Start
+            //         || char.IsWhiteSpace((currentRequest - 1).GetChar()))
+            //    {
+            //        foundWord = false;
+            //    }
+            //    else
+            //    {
+            //        // Try again, one character previous.  
+            //        //If the caret is at the end of a word, pick up the word.
+            //        word = TextStructureNavigator.GetExtentOfWord(currentRequest - 1);
 
-                    //If the word still isn't valid, we're done 
-                    if (!WordExtentIsValid(currentRequest, word))
-                        foundWord = false;
-                }
+            //        //If the word still isn't valid, we're done 
+            //        if (!WordExtentIsValid(currentRequest, word))
+            //            foundWord = false;
+            //    }
+            //}
+
+            //if (!foundWord)
+            //{
+            //    //If we couldn't find a word, clear out the existing markers
+            //    SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(), null);
+            //    return;
+            //}
+
+            //SnapshotSpan currentWord = word.Span;
+            ////If this is the current word, and the caret moved within a word, we're done. 
+            //if (CurrentWord.HasValue && currentWord == CurrentWord)
+            //    return;
+
+            ////Find the new spans
+            //FindData findData = new FindData(currentWord.GetText(), currentWord.Snapshot);
+            //findData.FindOptions = FindOptions.WholeWord | FindOptions.MatchCase;
+
+            //wordSpans.AddRange(TextSearchService.FindAll(findData));
+
+            List<InteroError> errors = errorContainer?.Find() ?? new List<InteroError>();
+
+            //var errorSpans = errors.Select(error =>
+            //{
+
+            //    //SnapshotPoint start = currentRequest.Snapshot.Lines.ElementAt(error.line - 1).Start.Add(error.column - 1);
+
+            //    SnapshotPoint start = new SnapshotPoint(SourceBuffer.CurrentSnapshot, 4);
+
+            //    //ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
+            //    //SnapshotSpan errorSpan = TextStructureNavigator.GetExtentOfWord(start).Span;
+            //    SnapshotSpan errorSpan = new SnapshotSpan(start, start.Add(4));
+            //    return errorSpan;
+            //});
+
+            List<SnapshotSpan> errorSpans = new List<SnapshotSpan>();
+            if (errors.Count > 0)
+            {
+                errorSpans.Add(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 4, 4));
             }
 
-            if (!foundWord)
-            {
-                //If we couldn't find a word, clear out the existing markers
-                SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(), null);
-                return;
-            }
+            NormalizedSnapshotSpanCollection errorSpanCollection = new NormalizedSnapshotSpanCollection(errorSpans);
 
-            SnapshotSpan currentWord = word.Span;
-            //If this is the current word, and the caret moved within a word, we're done. 
-            if (CurrentWord.HasValue && currentWord == CurrentWord)
-                return;
-
-            //Find the new spans
-            FindData findData = new FindData(currentWord.GetText(), currentWord.Snapshot);
-            findData.FindOptions = FindOptions.WholeWord | FindOptions.MatchCase;
-
-            wordSpans.AddRange(TextSearchService.FindAll(findData));
+            //wordSpans.Add(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, 10));
+            SnapshotSpan currentWord = new SnapshotSpan(SourceBuffer.CurrentSnapshot, 20, 5);
 
             //If another change hasn't happened, do a real update 
             if (currentRequest == RequestedPoint)
-                SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(wordSpans), currentWord);
+                SynchronousUpdate(currentRequest, errorSpanCollection, currentWord);
         }
         static bool WordExtentIsValid(SnapshotPoint currentRequest, TextExtent word)
         {
@@ -146,7 +184,7 @@ namespace FatalHaskell.Editor.Highlight
             }
         }
 
-        public IEnumerable<ITagSpan<ErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        public IEnumerable<ITagSpan<HighlightWordTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             if (CurrentWord == null)
                 yield break;
@@ -172,12 +210,12 @@ namespace FatalHaskell.Editor.Highlight
             // Note that we'll yield back the same word again in the wordspans collection; 
             // the duplication here is expected. 
             if (spans.OverlapsWith(new NormalizedSnapshotSpanCollection(currentWord)))
-                yield return new TagSpan<ErrorTag>(currentWord, new ErrorTag("syntax", "hello"));
+                yield return new TagSpan<HighlightWordTag>(currentWord, new HighlightWordTag());
 
             // Second, yield all the other words in the file 
             foreach (SnapshotSpan span in NormalizedSnapshotSpanCollection.Overlap(spans, wordSpans))
             {
-                yield return new TagSpan<ErrorTag>(span, new ErrorTag("syntax", "sub"));
+                yield return new TagSpan<HighlightWordTag>(span, new HighlightWordTag());
             }
         }
 

@@ -34,6 +34,7 @@ namespace FatalHaskell.External
             {
                 errors = InteroError.Create(line).ToList();
             }
+            ErrorsChanged?.Invoke(this);
         }
 
 
@@ -48,7 +49,10 @@ namespace FatalHaskell.External
             errors.Clear();
         }
 
+        public event Action<ErrorContainer> ErrorsChanged;
+
         private List<InteroError> errors;
+
     }
 
     
