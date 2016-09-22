@@ -35,7 +35,7 @@ namespace FatalHaskell.External
         private static EitherSuccessOrError<FHIntero,Error<String>> StartInternal(FHIntero intero, String projectDir)
         {
             return Communication.StartNewProcess(
-                   "stack", "ghci --with-ghc intero",
+                   "stack", "ghci --with-ghc intero --ghci-options -ferror-spans",
                    ProjectTree.GetDirWithFile(projectDir, "stack.yaml"))
                  .WhenSuccess(p =>
                  {

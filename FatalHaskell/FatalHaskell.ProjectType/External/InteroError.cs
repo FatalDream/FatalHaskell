@@ -14,14 +14,15 @@ namespace FatalHaskell.External
 
         public static Option<InteroError> Create(String s)
         {
-            Match m = Regex.Match(s, "(.+?):([0-9]+):([0-9]+): (error):");
+            Match m = Regex.Match(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):");
 
             if (m.Success)
             {
                 String path = m.Groups[1].Value;
                 int line = int.Parse(m.Groups[2].Value);
-                int column = int.Parse(m.Groups[3].Value);
-                return new InteroError(path, line, column);
+                int colStart = int.Parse(m.Groups[3].Value);
+                int colEnd = int.Parse(m.Groups[4].Value);
+                return new InteroError(path, line, colStart, colEnd);
             }
             else
             {
@@ -59,11 +60,12 @@ namespace FatalHaskell.External
         //    this.message = message;
         //}
 
-        private InteroError(String path, int line, int column)
+        private InteroError(String path, int line, int colStart, int colEnd)
         {
             this.path = path;
             this.line = line;
-            this.column = column;
+            this.colStart = colStart;
+            this.colEnd = colEnd;
             this.currentIndentation = 0;
             this.messages = new List<String>();
         }
@@ -73,7 +75,8 @@ namespace FatalHaskell.External
 
         // first line
         public int line;
-        public int column;
+        public int colStart;
+        public int colEnd;
         public String path;
 
         // other messages

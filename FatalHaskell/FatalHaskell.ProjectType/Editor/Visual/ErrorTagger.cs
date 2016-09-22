@@ -67,10 +67,12 @@ namespace FatalHaskell.Editor
 
             var errorSpans = errors.Select(error =>
             {
-                SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.column - 1);
+                SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.colStart - 1);
 
-                ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
-                SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
+                //ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
+                //SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
+
+                SnapshotSpan errorSpan = new SnapshotSpan(start, error.colEnd - error.colStart);
                 return errorSpan;
             });
 
@@ -82,7 +84,7 @@ namespace FatalHaskell.Editor
             {
                 foreach (var span in spans)
                 {
-                    SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.column - 1);
+                    SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.colStart - 1);
 
                     ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
                     SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
