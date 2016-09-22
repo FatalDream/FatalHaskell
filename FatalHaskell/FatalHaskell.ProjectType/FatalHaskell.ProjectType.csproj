@@ -177,6 +177,9 @@
     <Compile Include="Editor\Completion\FRCompletionSource.cs" />
     <Compile Include="Editor\Completion\FRCompletionSourceProvider.cs" />
     <Compile Include="Editor\Core\FileAndContentTypes.cs" />
+    <Compile Include="Editor\Highlight\HighlightWordTag.cs" />
+    <Compile Include="Editor\Highlight\HighlightWordTagger.cs" />
+    <Compile Include="Editor\Highlight\HighlightWordTaggerProvider.cs" />
     <Compile Include="Editor\Visual\ErrorSnapshotSpan.cs" />
     <Compile Include="Editor\Visual\ErrorTagger.cs" />
     <Compile Include="Editor\Visual\ErrorTaggerProvider.cs" />

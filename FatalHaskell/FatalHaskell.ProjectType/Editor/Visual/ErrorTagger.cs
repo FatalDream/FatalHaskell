@@ -71,15 +71,15 @@ namespace FatalHaskell.Editor
 
         void ViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
-            foreach (var span in e.NewOrReformattedSpans)
-            {
-                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
-            }
+            //foreach (var span in e.NewOrReformattedSpans)
+            //{
+            //    TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+            //}
 
-            foreach (var span in e.TranslatedSpans)
-            {
-                TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
-            }
+            //foreach (var span in e.TranslatedSpans)
+            //{
+            //    TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+            //}
 
             //TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(_sourceBuffer.CurrentSnapshot, 0, _sourceBuffer.CurrentSnapshot.Length)));
         }
