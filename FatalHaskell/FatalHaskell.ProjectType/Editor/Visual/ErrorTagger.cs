@@ -47,14 +47,15 @@ namespace FatalHaskell.Editor
 
         private void On_ErrorsChanged(ErrorContainer obj)
         {
-            _errorContainer = obj;
-
-            var spanList = _errorContainer.Find()
-                .Select(e => new ErrorSnapshotSpan(
-                    new SnapshotSpan(_view.TextSnapshot, e.PosLow, e.PosHigh - e.PosLow),
-                    e.message))
-                .ToList();
-
+            var spanList = obj.Find()
+                .Select(e =>
+                {
+                    SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(e.line - 1).Start.Add(e.column - 1);
+                    ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
+                    TextExtent extent = navigator.GetExtentOfWord(start);
+                    SnapshotSpan span = new SnapshotSpan(start, start.Add(3));
+                    return new ErrorSnapshotSpan(span, String.Join("\n", e.messages));
+                }).ToList();
 
             _errorSpans = spanList;
 
@@ -97,7 +98,7 @@ namespace FatalHaskell.Editor
             
 
             // THIS
-            if (spans[0].Snapshot != errorSpans[0].Span.Snapshot)
+            if (spans[0].Snapshot != errorSpans[0].start.Snapshot)
             {
                 errorSpans = new List<ErrorSnapshotSpan>(
                     errorSpans.Select(errSpan => errSpan.MapSpan(span => span.TranslateTo(spans[0].Snapshot, SpanTrackingMode.EdgeInclusive))));
@@ -115,9 +116,9 @@ namespace FatalHaskell.Editor
             {
                 foreach (var span in spans)
                 {
-                    if (errSpan.Span.IntersectsWith(span))
+                    if (errSpan.start.IntersectsWith(span))
                     {
-                        yield return new TagSpan<ErrorTag>(errSpan.Span, new ErrorTag(PredefinedErrorTypeNames.SyntaxError, errSpan.Message));
+                        yield return new TagSpan<ErrorTag>(errSpan.start, new ErrorTag(PredefinedErrorTypeNames.SyntaxError, errSpan.Message));
                     }
                 }
             }

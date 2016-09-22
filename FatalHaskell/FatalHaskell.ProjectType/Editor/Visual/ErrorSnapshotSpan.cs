@@ -17,18 +17,18 @@ namespace FatalHaskell.Editor
 {
     class ErrorSnapshotSpan
     {
-        public SnapshotSpan Span;
+        public SnapshotPoint start;
         public String Message;
 
-        public ErrorSnapshotSpan(SnapshotSpan span, String message)
+        public ErrorSnapshotSpan(SnapshotPoint start, String message)
         {
-            this.Span = span;
+            this.start = start;
             this.Message = message;
         }
 
-        public ErrorSnapshotSpan MapSpan(Func<SnapshotSpan,SnapshotSpan> f)
+        public ErrorSnapshotSpan MapSpan(Func<SnapshotPoint,SnapshotPoint> f)
         {
-            return new ErrorSnapshotSpan(f(Span), Message);
+            return new ErrorSnapshotSpan(f(start), Message);
         }
     }
 }

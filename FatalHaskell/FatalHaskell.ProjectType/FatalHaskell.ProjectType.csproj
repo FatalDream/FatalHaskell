@@ -168,6 +168,7 @@
   <ItemGroup>
     <Compile Include="Core\Communication.cs" />
     <Compile Include="Core\Error.cs" />
+    <Compile Include="Core\ListMonad.cs" />
     <Compile Include="Core\ProjectTree.cs" />
     <Compile Include="Core\ProcessOutput.cs" />
     <Compile Include="Core\Success.cs" />

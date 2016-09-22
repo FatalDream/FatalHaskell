@@ -39,63 +39,58 @@ namespace FatalHaskell.External
                    ProjectTree.GetDirWithFile(projectDir, "stack.yaml"))
                  .WhenSuccess(p =>
                  {
+                     p.ErrorDataReceived += (e, s) => intero.OnReceiveError(s.Data);
+                     p.BeginErrorReadLine();
                      p.StandardInput.WriteLine(":set prompt >");
                      ReadAll(p);
                  })
                  .Select(p => intero.Initialize(p));
         }
 
-        private FHIntero() { }
+        private FHIntero()
+        {
+            this.Errors = new ErrorContainer();
+        }
         #endregion Constructor
 
 
 
         public event Action<ErrorContainer> ErrorsChanged;
 
-        private Action<String> CommandWriter;
-
-        private TaskCompletionSource<List<String>> ResponseSource;
-
-        private List<String> PartialResponses;
-
-        private ErrorContainer RustcErrors;
+        private ErrorContainer Errors;
 
         private Process CurrentProcess;
 
         private FHIntero Initialize(Process CurrentProcess)
         {
             this.CurrentProcess = CurrentProcess;
-            this.ResponseSource = null;
-            this.PartialResponses = new List<String>();
-            this.RustcErrors = new ErrorContainer();
             return this;
         }
 
-        public async Task<List<String>> GetCompletions()
-        {
-            ResponseSource = new TaskCompletionSource<List<String>>();
-            CurrentProcess.StandardInput.WriteLine("get");
-            return await ResponseSource.Task;
-        }
+        //public async Task<List<String>> GetCompletions()
+        //{
+        //    ResponseSource = new TaskCompletionSource<List<String>>();
+        //    CurrentProcess.StandardInput.WriteLine("get");
+        //    return await ResponseSource.Task;
+        //}
 
         public List<String> UpdateAndGetCompletions(String filename, String contents)
         {
-            RustcErrors.Errors.Clear();
+            return GetResponse(":r");
+        }
 
-            ResponseSource = new TaskCompletionSource<List<String>>();
-            CurrentProcess.StandardInput.WriteLine(":r");
+        private List<String> GetResponse(String request)
+        {
+            Errors.Clear();
+            CurrentProcess.StandardInput.WriteLine(request);
+            List<String> response = ReadAll();
+            ErrorsChanged?.Invoke(Errors);
+            return response;
+        }
 
-
+        private List<String> ReadAll()
+        {
             return ReadAll(CurrentProcess);
-
-            //CommandWriter("update");
-            //CommandWriter(filename);
-            //CommandWriter(contents);
-            //CommandWriter((char)26 + "");
-
-            //ErrorsChanged?.Invoke(RustcErrors);
-            ////return await GetCompletions();
-            //return new string[] { "comp1", "comp2", "hello" }.ToList();
         }
 
         private static List<String> ReadAll(Process p)
@@ -109,28 +104,26 @@ namespace FatalHaskell.External
                 else
                     result += c;
             }
-            p.StandardOutput.Read();
             return result.Split('\n').ToList();
         }
 
 
-        private void OnReceiveResponse(String response)
-        {
-            if (response.Contains("Collecting type info"))
-            {
-                ResponseSource?.TrySetResult(PartialResponses);
-                PartialResponses = new List<String>();
-            }
-            else
-            {
-                PartialResponses.Add(response);
-            }
-        }
+        //private void OnReceiveResponse(String response)
+        //{
+        //    if (response.Contains("Collecting type info"))
+        //    {
+        //        ResponseSource?.TrySetResult(PartialResponses);
+        //        PartialResponses = new List<String>();
+        //    }
+        //    else
+        //    {
+        //        PartialResponses.Add(response);
+        //    }
+        //}
 
         private void OnReceiveError(String error)
         {
-            InteroError.Create(error)
-                .WhenSome(e => RustcErrors.Errors.Add(e));
+            Errors.AppendOrCreate(error);
         }
     }
 }

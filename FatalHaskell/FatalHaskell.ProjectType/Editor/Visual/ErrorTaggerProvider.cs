@@ -35,6 +35,9 @@ namespace FatalHaskell.Editor
         //    projectPath = Path.GetDirectoryName(full);
         //}
 
+        [Import]
+        internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
+
         private String projectPath;
 
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
