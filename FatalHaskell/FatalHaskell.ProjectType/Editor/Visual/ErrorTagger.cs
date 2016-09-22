@@ -13,6 +13,7 @@ using System.Windows.Media;
 using FatalHaskell.External;
 using Bearded.Monads;
 using Microsoft.VisualStudio.Text.Adornments;
+using FatalIDE.Core;
 
 namespace FatalHaskell.Editor
 {
@@ -23,8 +24,9 @@ namespace FatalHaskell.Editor
         private readonly ITextBuffer _sourceBuffer;
         private readonly ITagAggregator<ErrorTag> _aggregator;
         private ErrorTaggerProvider _provider;
-        private readonly String _filename;
+        private readonly String relativeFilename;
         private ErrorContainer _errorContainer;
+        private FHIntero intero;
         
 
         internal ErrorTagger(
@@ -32,15 +34,22 @@ namespace FatalHaskell.Editor
                 ITextBuffer buffer,
                 String filename,
                 ITagAggregator<ErrorTag> asmTagAggregator,
-                ErrorTaggerProvider provider)
+                ErrorTaggerProvider provider,
+                FHIntero intero)
         {
             this._view = view;
             this._sourceBuffer = buffer;
             this._aggregator = asmTagAggregator;
             this._provider = provider;
             this._view.LayoutChanged += ViewLayoutChanged;
-            _filename = filename;
-            FHIntero.Instance(filename).WhenSuccess(i => i.Errors.ErrorsChanged += On_ErrorsChanged);
+            this.intero = intero;
+            intero.Errors.ErrorsChanged += On_ErrorsChanged;
+
+            String projectDir = ProjectTree.FindProjectDir(filename);
+            relativeFilename = ProjectTree.GetPathDiff(projectDir, filename)
+                .Unify(
+                    pathDiff => pathDiff,
+                    ()       => "" );
         }
 
         private void On_ErrorsChanged(ErrorContainer obj)
@@ -53,14 +62,16 @@ namespace FatalHaskell.Editor
 
         void ViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
         {
+            intero.UpdateFile(relativeFilename, e.NewSnapshot.GetText());
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
         IEnumerable<ITagSpan<ErrorTag>> ITagger<ErrorTag>.GetTags(NormalizedSnapshotSpanCollection spans)
         {
+            
 
-            List<InteroError> errors = _errorContainer?.Find() ?? new List<InteroError>();
+            List<InteroError> errors = _errorContainer?.Find(relativeFilename) ?? new List<InteroError>();
 
             if (spans.Count == 0 || errors.Count == 0)
                 yield break;

@@ -12,17 +12,19 @@ namespace FatalHaskell.External
     class InteroError
     {
 
-        public static Option<InteroError> Create(String s)
+        public static Option<InteroError> Create(String s, String projectPath)
         {
             Match m = Regex.Match(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):");
 
             if (m.Success)
             {
-                String path = m.Groups[1].Value;
+
                 int line = int.Parse(m.Groups[2].Value);
                 int colStart = int.Parse(m.Groups[3].Value);
                 int colEnd = int.Parse(m.Groups[4].Value);
-                return new InteroError(path, line, colStart, colEnd);
+
+                return from path in ProjectTree.GetPathDiff(projectPath, m.Groups[1].Value)
+                       select new InteroError(path, line, colStart, colEnd);
             }
             else
             {
@@ -30,7 +32,7 @@ namespace FatalHaskell.External
             }
         }
 
-        public List<InteroError> AppendOrCreate(String line)
+        public List<InteroError> AppendOrCreate(String line, String projectPath)
         {
             String trimmedLine = line.TrimStart(' ', '*');
             int newIndentation = line.Length - trimmedLine.Length;
@@ -47,8 +49,9 @@ namespace FatalHaskell.External
             }
             else
             {
-                List<InteroError> result = Create(line).ToList();
+                List<InteroError> result = new List<InteroError>();
                 result.Add(this);
+                result.AddRange(Create(line, projectPath).ToList());
                 return result;
             }
         }

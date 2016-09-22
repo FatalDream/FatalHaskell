@@ -11,9 +11,10 @@ namespace FatalHaskell.External
     class ErrorContainer
     {
 
-        public ErrorContainer()
+        public ErrorContainer(String basePath)
         {
             errors = new List<InteroError>();
+            this.basePath = basePath;
         }
 
         public void AppendOrCreate(String line)
@@ -24,7 +25,7 @@ namespace FatalHaskell.External
                 errors = errors.SelectMany<InteroError, InteroError>((e, i) =>
                 {
                     if (i == last)
-                        return e.AppendOrCreate(line);
+                        return e.AppendOrCreate(line, basePath);
                     else
                         return new InteroError[] { e };
                 })
@@ -32,16 +33,16 @@ namespace FatalHaskell.External
             }
             else
             {
-                errors = InteroError.Create(line).ToList();
+                errors = InteroError.Create(line, basePath).ToList();
             }
             ErrorsChanged?.Invoke(this);
         }
 
 
 
-        public List<InteroError> Find()
+        public List<InteroError> Find(String relativePath)
         {
-            return errors;
+            return errors.Where(e => e.path == relativePath).ToList();
         }
 
         public void Clear()
@@ -52,7 +53,7 @@ namespace FatalHaskell.External
         public event Action<ErrorContainer> ErrorsChanged;
 
         private List<InteroError> errors;
-
+        private String basePath;
     }
 
     

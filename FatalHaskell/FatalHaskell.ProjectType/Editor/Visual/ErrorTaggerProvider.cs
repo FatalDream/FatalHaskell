@@ -12,6 +12,9 @@ using Microsoft.VisualStudio.Utilities;
 using System.Windows.Media;
 using Microsoft.VisualStudio.ProjectSystem;
 using System.IO;
+using FatalHaskell.External;
+using Bearded.Monads;
+using System.Windows;
 
 namespace FatalHaskell.Editor
 {
@@ -49,8 +52,19 @@ namespace FatalHaskell.Editor
                 fileName = curDoc.FilePath;
             }
 
-            ITagAggregator<FRErrorTag> asmTagAggregator = _aggregatorFactory.CreateTagAggregator<FRErrorTag>(buffer);
-            return new ErrorTagger(textView, buffer, fileName, asmTagAggregator, this) as ITagger<T>;
+
+            return FHIntero.Instance(fileName).Unify(
+                intero =>
+                {
+                    ITagAggregator<FRErrorTag> asmTagAggregator = _aggregatorFactory.CreateTagAggregator<FRErrorTag>(buffer);
+                    return new ErrorTagger(textView, buffer, fileName, asmTagAggregator, this, intero) as ITagger<T>;
+                },
+                error =>
+                {
+                    MessageBox.Show(error.ToString());
+                    return null;
+                }
+                );
         }
     }
 }

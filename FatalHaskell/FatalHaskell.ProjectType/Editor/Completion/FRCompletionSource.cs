@@ -38,9 +38,7 @@ namespace FatalHaskell.Editor
             //        m_textBuffer.CurrentSnapshot.GetText());
             //});
 
-            List<String> strList = intero.UpdateAndGetCompletions(
-                                                dte.ActiveDocument.FullName,
-                                                m_textBuffer.CurrentSnapshot.GetText());
+            List<String> strList = intero.GetCompletions();
 
             //List<string> strList = new List<string>();
             //strList.Add("addition");
