@@ -16,7 +16,7 @@ namespace FatalHaskell.Editor.Highlight
 {
     [Export(typeof(IViewTaggerProvider))]
     [ContentType("hs")]
-    [TagType(typeof(ErrorTag))]
+    [TagType(typeof(HighlightWordTag))]
     [AppliesTo("FatalHaskell")]
     internal class HighlightWordTaggerProvider : IViewTaggerProvider
     {

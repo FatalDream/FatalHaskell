@@ -89,78 +89,53 @@ namespace FatalHaskell.Editor.Highlight
         {
             SnapshotPoint currentRequest = RequestedPoint;
             List<SnapshotSpan> wordSpans = new List<SnapshotSpan>();
-            ////Find all words in the buffer like the one the caret is on
-            //TextExtent word = TextStructureNavigator.GetExtentOfWord(currentRequest);
-            //bool foundWord = true;
-            ////If we've selected something not worth highlighting, we might have missed a "word" by a little bit
-            //if (!WordExtentIsValid(currentRequest, word))
-            //{
-            //    //Before we retry, make sure it is worthwhile 
-            //    if (word.Span.Start != currentRequest
-            //         || currentRequest == currentRequest.GetContainingLine().Start
-            //         || char.IsWhiteSpace((currentRequest - 1).GetChar()))
-            //    {
-            //        foundWord = false;
-            //    }
-            //    else
-            //    {
-            //        // Try again, one character previous.  
-            //        //If the caret is at the end of a word, pick up the word.
-            //        word = TextStructureNavigator.GetExtentOfWord(currentRequest - 1);
-
-            //        //If the word still isn't valid, we're done 
-            //        if (!WordExtentIsValid(currentRequest, word))
-            //            foundWord = false;
-            //    }
-            //}
-
-            //if (!foundWord)
-            //{
-            //    //If we couldn't find a word, clear out the existing markers
-            //    SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(), null);
-            //    return;
-            //}
-
-            //SnapshotSpan currentWord = word.Span;
-            ////If this is the current word, and the caret moved within a word, we're done. 
-            //if (CurrentWord.HasValue && currentWord == CurrentWord)
-            //    return;
-
-            ////Find the new spans
-            //FindData findData = new FindData(currentWord.GetText(), currentWord.Snapshot);
-            //findData.FindOptions = FindOptions.WholeWord | FindOptions.MatchCase;
-
-            //wordSpans.AddRange(TextSearchService.FindAll(findData));
-
-            List<InteroError> errors = errorContainer?.Find() ?? new List<InteroError>();
-
-            //var errorSpans = errors.Select(error =>
-            //{
-
-            //    //SnapshotPoint start = currentRequest.Snapshot.Lines.ElementAt(error.line - 1).Start.Add(error.column - 1);
-
-            //    SnapshotPoint start = new SnapshotPoint(SourceBuffer.CurrentSnapshot, 4);
-
-            //    //ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
-            //    //SnapshotSpan errorSpan = TextStructureNavigator.GetExtentOfWord(start).Span;
-            //    SnapshotSpan errorSpan = new SnapshotSpan(start, start.Add(4));
-            //    return errorSpan;
-            //});
-
-            List<SnapshotSpan> errorSpans = new List<SnapshotSpan>();
-            if (errors.Count > 0)
+            //Find all words in the buffer like the one the caret is on
+            TextExtent word = TextStructureNavigator.GetExtentOfWord(currentRequest);
+            bool foundWord = true;
+            //If we've selected something not worth highlighting, we might have missed a "word" by a little bit
+            if (!WordExtentIsValid(currentRequest, word))
             {
-                errorSpans.Add(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 4, 4));
+                //Before we retry, make sure it is worthwhile 
+                if (word.Span.Start != currentRequest
+                     || currentRequest == currentRequest.GetContainingLine().Start
+                     || char.IsWhiteSpace((currentRequest - 1).GetChar()))
+                {
+                    foundWord = false;
+                }
+                else
+                {
+                    // Try again, one character previous.  
+                    //If the caret is at the end of a word, pick up the word.
+                    word = TextStructureNavigator.GetExtentOfWord(currentRequest - 1);
+
+                    //If the word still isn't valid, we're done 
+                    if (!WordExtentIsValid(currentRequest, word))
+                        foundWord = false;
+                }
             }
 
-            NormalizedSnapshotSpanCollection errorSpanCollection = new NormalizedSnapshotSpanCollection(errorSpans);
+            if (!foundWord)
+            {
+                //If we couldn't find a word, clear out the existing markers
+                SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(), null);
+                return;
+            }
 
-            //wordSpans.Add(new SnapshotSpan(SourceBuffer.CurrentSnapshot, 0, 10));
-            SnapshotSpan currentWord = new SnapshotSpan(SourceBuffer.CurrentSnapshot, 20, 5);
+            SnapshotSpan currentWord = word.Span;
+            //If this is the current word, and the caret moved within a word, we're done. 
+            if (CurrentWord.HasValue && currentWord == CurrentWord)
+                return;
+
+            //Find the new spans
+            FindData findData = new FindData(currentWord.GetText(), currentWord.Snapshot);
+            findData.FindOptions = FindOptions.WholeWord | FindOptions.MatchCase;
+
+            wordSpans.AddRange(TextSearchService.FindAll(findData));
+            
 
             //If another change hasn't happened, do a real update 
             if (currentRequest == RequestedPoint)
-                SynchronousUpdate(currentRequest, errorSpanCollection, currentWord);
+                SynchronousUpdate(currentRequest, new NormalizedSnapshotSpanCollection(wordSpans), currentWord);
         }
         static bool WordExtentIsValid(SnapshotPoint currentRequest, TextExtent word)
         {
