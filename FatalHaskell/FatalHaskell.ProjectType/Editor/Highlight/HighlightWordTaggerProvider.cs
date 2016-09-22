@@ -25,11 +25,7 @@ namespace FatalHaskell.Editor.Highlight
 
         [Import]
         internal ITextStructureNavigatorSelectorService TextStructureNavigatorSelector { get; set; }
-
-
-        [Import]
-        ITextDocumentFactoryService documentFactoryService;
-
+        
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
             //provide highlighting only on the top buffer 
@@ -39,14 +35,7 @@ namespace FatalHaskell.Editor.Highlight
             ITextStructureNavigator textStructureNavigator =
                 TextStructureNavigatorSelector.GetTextStructureNavigator(buffer);
 
-            ITextDocument curDoc = null;
-            String fileName = null;
-            if (documentFactoryService.TryGetTextDocument(buffer, out curDoc))
-            {
-                fileName = curDoc.FilePath;
-            }
-
-            return new HighlightWordTagger(textView, buffer, TextSearchService, textStructureNavigator, fileName) as ITagger<T>;
+            return new HighlightWordTagger(textView, buffer, TextSearchService, textStructureNavigator) as ITagger<T>;
         }
     }
 }

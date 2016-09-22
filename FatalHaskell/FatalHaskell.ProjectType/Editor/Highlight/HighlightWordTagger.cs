@@ -28,10 +28,8 @@ namespace FatalHaskell.Editor.Highlight
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
-        ErrorContainer errorContainer;
-
         public HighlightWordTagger(ITextView view, ITextBuffer sourceBuffer, ITextSearchService textSearchService,
-            ITextStructureNavigator textStructureNavigator, String filename)
+            ITextStructureNavigator textStructureNavigator)
         {
             this.View = view;
             this.SourceBuffer = sourceBuffer;
@@ -41,14 +39,6 @@ namespace FatalHaskell.Editor.Highlight
             this.CurrentWord = null;
             this.View.Caret.PositionChanged += CaretPositionChanged;
             this.View.LayoutChanged += ViewLayoutChanged;
-
-            FHIntero.Instance(filename).WhenSuccess(i => i.Errors.ErrorsChanged += On_ErrorsChanged);
-        }
-
-        private void On_ErrorsChanged(ErrorContainer obj)
-        {
-            errorContainer = obj;
-            UpdateWordAdornments();
         }
 
         void ViewLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
