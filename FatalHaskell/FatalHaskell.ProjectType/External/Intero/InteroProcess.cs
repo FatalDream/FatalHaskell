@@ -67,7 +67,7 @@ namespace FatalHaskell.External
                 currentProcess.StandardInput.WriteLine(request);
                 List<String> output = ReadAll();
 
-                await Task.Delay(TimeSpan.FromMilliseconds(1000));
+                await Task.Delay(TimeSpan.FromMilliseconds(50));
 
                 result = new InteroResponse(output, currentErrors);
             }
@@ -90,7 +90,7 @@ namespace FatalHaskell.External
                 else
                     result += c;
             }
-            return result.Split('\n').ToList();
+            return result.Split('\n').Select(s => s.TrimEnd('\r')).ToList();
         }
 
         private void OnReceiveError(String error)

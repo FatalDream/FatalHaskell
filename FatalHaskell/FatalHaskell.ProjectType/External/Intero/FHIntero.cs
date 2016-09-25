@@ -116,7 +116,7 @@ namespace FatalHaskell.External
         }
         private void SaveCorrectMirrorProject()
         {
-            CopyMirrorFiles(mirrorDirs.original, mirrorDirs.correct, filesToMirrorCorrect);
+            CopyMirrorFiles(mirrorDirs.direct, mirrorDirs.correct, filesToMirrorCorrect);
             correctProcess.GetResponse(":r");
         }
 
@@ -174,6 +174,8 @@ namespace FatalHaskell.External
         #region ErrorHandling
         /////////////////
 
+        public event Action<ErrorContainer> ErrorsChanged;
+
         public void HandleErrors(List<String> errors)
         {
             this.Errors.Clear();
@@ -181,6 +183,8 @@ namespace FatalHaskell.External
             {
                 this.Errors.AppendOrCreate(error);
             }
+
+            ErrorsChanged?.Invoke(Errors);
         }
 
         #endregion

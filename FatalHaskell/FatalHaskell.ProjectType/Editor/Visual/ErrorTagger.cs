@@ -43,7 +43,7 @@ namespace FatalHaskell.Editor
             this._provider = provider;
             this._view.LayoutChanged += ViewLayoutChanged;
             this.intero = intero;
-            intero.Errors.ErrorsChanged += On_ErrorsChanged;
+            intero.ErrorsChanged += On_ErrorsChanged;
 
             String projectDir = ProjectTree.FindProjectDir(filename);
             relativeFilename = ProjectTree.GetPathDiff(projectDir, filename)
@@ -76,30 +76,28 @@ namespace FatalHaskell.Editor
             if (spans.Count == 0 || errors.Count == 0)
                 yield break;
 
-            var errorSpans = errors.Select(error =>
-            {
-                SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.colStart - 1);
-
-                //ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
-                //SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
-
-                SnapshotSpan errorSpan = new SnapshotSpan(start, error.colEnd - error.colStart);
-                return errorSpan;
-            });
-
-            NormalizedSnapshotSpanCollection errorSpanCollection = new NormalizedSnapshotSpanCollection(errorSpans);
-
-            
-
             foreach (var error in errors)
             {
                 foreach (var span in spans)
                 {
-                    SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.colStart - 1);
+                    //SnapshotPoint start = _sourceBuffer.CurrentSnapshot.Lines.ElementAt(error.line - 1).Start.Add(error.colStart - 1);
+                    //ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
+                    //SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
 
-                    ITextStructureNavigator navigator = _provider.NavigatorService.GetTextStructureNavigator(_sourceBuffer);
-                    SnapshotSpan errorSpan = navigator.GetExtentOfWord(start).Span;
 
+                    var line = TryIndex(error.line - 1, l => _sourceBuffer.CurrentSnapshot.Lines.ElementAt(l)).Start;
+                    SnapshotPoint start = TryIndex(error.colStart - 1, c => line.Add(c));
+
+                    int maxLength = start.Snapshot.Length - start.Position;
+                    int suggestedLength = error.colEnd - error.colStart + 1;
+
+                    SnapshotPoint end;
+                    if (suggestedLength > maxLength)
+                        end = start.Add(maxLength);
+                    else
+                        end = start.Add(suggestedLength);
+
+                    SnapshotSpan errorSpan = new SnapshotSpan(start, end);
 
                     if (span.IntersectsWith(errorSpan))
                     {
@@ -107,7 +105,18 @@ namespace FatalHaskell.Editor
                     }
                 }
             }
-            
+        }
+
+        static private R TryIndex<R>(int start, Func<int,R> f)
+        {
+            try
+            {
+                return f(start);
+            }
+            catch (Exception)
+            {
+                return TryIndex(start - 1, f);
+            }
         }
     }
 }
