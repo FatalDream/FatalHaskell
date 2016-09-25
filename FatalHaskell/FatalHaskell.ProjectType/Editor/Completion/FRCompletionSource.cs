@@ -33,9 +33,11 @@ namespace FatalHaskell.Editor
         public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
 
+            var tokenSpan = FindTokenSpanAtPosition(session.GetTriggerPoint(m_textBuffer), session);
+
             List<String> strList = ThreadHelper.JoinableTaskFactory.Run(() =>
             {
-                return intero.GetCompletions(relativeFilename);
+                return intero.GetCompletions(relativeFilename, tokenSpan.GetText(session.TextView.TextSnapshot));
             });
 
             //List<string> strList = new List<string>();

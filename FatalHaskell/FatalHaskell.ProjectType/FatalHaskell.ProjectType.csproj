@@ -190,7 +190,7 @@
     <Compile Include="External\ErrorContainer.cs" />
     <Compile Include="External\Intero\FHIntero.cs" />
     <Compile Include="External\HaskellStack.cs" />
-    <Compile Include="External\InteroError.cs" />
+    <Compile Include="External\Intero\InteroError.cs" />
     <Compile Include="External\Intero\InteroProcess.cs" />
     <Compile Include="External\Intero\InteroResponse.cs" />
     <Compile Include="External\Intero\MirrorDirectories.cs" />

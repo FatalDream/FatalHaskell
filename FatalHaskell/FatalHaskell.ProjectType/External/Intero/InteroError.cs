@@ -14,22 +14,43 @@ namespace FatalHaskell.External
 
         public static Option<InteroError> Create(String s, String projectPath)
         {
-            Match m = Regex.Match(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):");
+            //Match mCol = Regex.Match(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):");
 
+            Func<Option<InteroError>> matchSingleCol =
+                () => MatchError(s, "(.+?):([0-9]+):([0-9]+): (error):")
+                .SelectMany(singleCol =>
+                {
+                    int line = int.Parse(singleCol.Groups[2].Value);
+                    int col = int.Parse(singleCol.Groups[3].Value);
+
+                    return from path in ProjectTree.GetPathDiff(projectPath, singleCol.Groups[1].Value)
+                           select new InteroError(path, line, col, col);
+                });
+
+
+            Func<Option<InteroError>> matchMultiCol =
+                () => MatchError(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):")
+                .SelectMany(multiCol =>
+                {
+                    int line     = int.Parse(multiCol.Groups[2].Value);
+                    int colStart = int.Parse(multiCol.Groups[3].Value);
+                    int colEnd   = int.Parse(multiCol.Groups[4].Value);
+
+                    return from path in ProjectTree.GetPathDiff(projectPath, multiCol.Groups[1].Value)
+                           select new InteroError(path, line, colStart, colEnd);
+                });
+
+            return matchMultiCol() .Or( matchSingleCol);
+
+        }
+
+        private static Option<Match> MatchError(String input, String r)
+        {
+            Match m = Regex.Match(input, r);
             if (m.Success)
-            {
-
-                int line = int.Parse(m.Groups[2].Value);
-                int colStart = int.Parse(m.Groups[3].Value);
-                int colEnd = int.Parse(m.Groups[4].Value);
-
-                return from path in ProjectTree.GetPathDiff(projectPath, m.Groups[1].Value)
-                       select new InteroError(path, line, colStart, colEnd);
-            }
+                return m;
             else
-            {
-                return Option<InteroError>.None;
-            }
+                return Option<Match>.None;
         }
 
         public List<InteroError> AppendOrCreate(String line, String projectPath)

@@ -161,10 +161,10 @@ namespace FatalHaskell.External
         #region Completion
         /////////////////
 
-        public async Task<List<String>> GetCompletions(String relativeFilename)
+        public async Task<List<String>> GetCompletions(String relativeFilename, String curWord)
         {
             String filename = mirrorDirs.correct + relativeFilename;
-            var response = await correctProcess.GetResponse(":complete-at " + filename + " 1 1 1 1 \"\"");
+            var response = await correctProcess.GetResponse(":complete-at " + filename + " 1 1 1 1 \"" + curWord + "\"");
             return response.output;
         }
 

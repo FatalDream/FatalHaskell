@@ -17,5 +17,12 @@ namespace FatalIDE.Core
                 .WhenNone(() => result = noneF());
             return result;
         }
+
+        public static Option<A> Or<A>(this Option<A> self, Func<Option<A>> f)
+        {
+            return self.Unify(
+                a  => a,
+                () => f());
+        }
     }
 }
