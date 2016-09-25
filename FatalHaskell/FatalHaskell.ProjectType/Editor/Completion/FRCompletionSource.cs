@@ -10,6 +10,7 @@ using FatalHaskell.External;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
+using FatalIDE.Core;
 
 namespace FatalHaskell.Editor
 {
@@ -19,26 +20,23 @@ namespace FatalHaskell.Editor
         private ITextBuffer m_textBuffer;
         private List<Completion> m_compList;
         private FHIntero intero;
-        private DTE dte;
+        private readonly String relativeFilename;
 
-        public FHCompletionSource(FHCompletionSourceProvider sourceProvider, ITextBuffer textBuffer, FHIntero intero, DTE dte)
+        public FHCompletionSource(FHCompletionSourceProvider sourceProvider, ITextBuffer textBuffer, FHIntero intero, String relativeFilename)
         {
             m_sourceProvider = sourceProvider;
             m_textBuffer = textBuffer;
             this.intero = intero;
-            this.dte = dte;
+            this.relativeFilename = relativeFilename;
         }
 
         public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
         {
-            //List<String> strList = ThreadHelper.JoinableTaskFactory.Run( () =>
-            //{
-            //    return intero.UpdateAndGetCompletions(
-            //        dte.ActiveDocument.FullName,
-            //        m_textBuffer.CurrentSnapshot.GetText());
-            //});
 
-            List<String> strList = intero.GetCompletions();
+            List<String> strList = ThreadHelper.JoinableTaskFactory.Run(() =>
+            {
+                return intero.GetCompletions(relativeFilename);
+            });
 
             //List<string> strList = new List<string>();
             //strList.Add("addition");

@@ -10,6 +10,12 @@ namespace FatalIDE.Core
 {
     class ProjectTree
     {
+        public static Option<String> RelativeFilename(String filename)
+        {
+            String projectDir = ProjectTree.FindProjectDir(filename);
+            return ProjectTree.GetPathDiff(projectDir, filename);
+        }
+
         public static String GetDirWithFile(String somePath, String fileName)
         {
             if (Path.HasExtension(somePath))

@@ -168,6 +168,7 @@
   <ItemGroup>
     <Compile Include="Core\Communication.cs" />
     <Compile Include="Core\DictionaryExtension.cs" />
+    <Compile Include="Core\FEitherExtension.cs" />
     <Compile Include="Core\Error.cs" />
     <Compile Include="Core\ListMonad.cs" />
     <Compile Include="Core\OptionExtension.cs" />
@@ -187,9 +188,12 @@
     <Compile Include="Editor\Visual\ErrorTaggerProvider.cs" />
     <Compile Include="Editor\Visual\FRErrorTag.cs" />
     <Compile Include="External\ErrorContainer.cs" />
-    <Compile Include="External\FHIntero.cs" />
+    <Compile Include="External\Intero\FHIntero.cs" />
     <Compile Include="External\HaskellStack.cs" />
     <Compile Include="External\InteroError.cs" />
+    <Compile Include="External\Intero\InteroProcess.cs" />
+    <Compile Include="External\Intero\InteroResponse.cs" />
+    <Compile Include="External\Intero\MirrorDirectories.cs" />
     <Compile Include="FHBuildSystem\Builder.cs" />
     <Compile Include="FHBuildSystem\IBuilder.cs" />
     <Compile Include="FHBuildSystem\ILogger.cs" />

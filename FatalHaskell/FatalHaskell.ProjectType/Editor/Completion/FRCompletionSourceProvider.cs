@@ -1,6 +1,7 @@
 ﻿using Bearded.Monads;
 using EnvDTE;
 using FatalHaskell.External;
+using FatalIDE.Core;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.Shell;
@@ -28,15 +29,15 @@ namespace FatalHaskell.Editor
         [Import]
         internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
 
-        DTE dte;
-
+        [Import]
+        ITextDocumentFactoryService documentFactoryService;
+        
         public Option<FHIntero> intero;
         
         [ImportingConstructor]
         FHCompletionSourceProvider(SVsServiceProvider ServiceProvider)
         {
-
-            dte = (DTE)ServiceProvider.GetService(typeof(DTE));
+            DTE dte = (DTE)ServiceProvider.GetService(typeof(DTE));
             String mainDir = Path.GetDirectoryName(dte.ActiveDocument.FullName);
 
             intero = FHIntero.Instance(mainDir).Unify(
@@ -47,11 +48,18 @@ namespace FatalHaskell.Editor
                 });
         }
 
-        public ICompletionSource TryCreateCompletionSource(ITextBuffer textBuffer)
+        public ICompletionSource TryCreateCompletionSource(ITextBuffer buffer)
         {
+            ITextDocument curDoc = null;
+            Option<String> fileName = Option<String>.None;
+            if (documentFactoryService.TryGetTextDocument(buffer, out curDoc))
+            {
+                fileName = ProjectTree.RelativeFilename(curDoc.FilePath);
+            }
+
             return intero
-                .Select(  index => new FHCompletionSource(this, textBuffer, index, dte))
-                .Else(    () => (FHCompletionSource)null);
+                .SelectMany( i  => fileName.Select( f => new FHCompletionSource(this, buffer, i, f)))
+                .Else(   () => null);
         }
 
 

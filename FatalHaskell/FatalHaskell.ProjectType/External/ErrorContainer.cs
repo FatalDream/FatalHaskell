@@ -19,25 +19,27 @@ namespace FatalHaskell.External
 
         public void AppendOrCreate(String line)
         {
-            int last = errors.Count - 1;
-            if (last >= 0)
+            lock (errors)
             {
-                errors = errors.SelectMany<InteroError, InteroError>((e, i) =>
+                int last = errors.Count - 1;
+                if (last >= 0)
                 {
-                    if (i == last)
-                        return e.AppendOrCreate(line, basePath);
-                    else
-                        return new InteroError[] { e };
-                })
-                .ToList();
+                    errors = errors.SelectMany<InteroError, InteroError>((e, i) =>
+                    {
+                        if (i == last)
+                            return e.AppendOrCreate(line, basePath);
+                        else
+                            return new InteroError[] { e };
+                    })
+                    .ToList();
+                }
+                else
+                {
+                    errors = InteroError.Create(line, basePath).ToList();
+                }
+                ErrorsChanged?.Invoke(this);
             }
-            else
-            {
-                errors = InteroError.Create(line, basePath).ToList();
-            }
-            ErrorsChanged?.Invoke(this);
         }
-
 
 
         public List<InteroError> Find(String relativePath)
