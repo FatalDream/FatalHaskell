@@ -68,6 +68,7 @@ namespace FatalHaskell.Editor
             }
             else
             {
+                m_session.Recalculate();
                 m_session.Filter();
             }
         }

@@ -28,6 +28,13 @@ namespace FatalHaskell.Editor
             m_textBuffer = textBuffer;
             this.intero = intero;
             this.relativeFilename = relativeFilename;
+
+            textBuffer.Changed += TextBuffer_Changed;
+        }
+
+        private void TextBuffer_Changed(object sender, TextContentChangedEventArgs args)
+        {
+            
         }
 
         public void AugmentCompletionSession(ICompletionSession session, IList<CompletionSet> completionSets)
@@ -37,7 +44,7 @@ namespace FatalHaskell.Editor
 
             List<String> strList = ThreadHelper.JoinableTaskFactory.Run(() =>
             {
-                return intero.GetCompletions(relativeFilename, tokenSpan.GetText(session.TextView.TextSnapshot));
+                return intero.GetCompletions(relativeFilename, tokenSpan.GetText(m_textBuffer.CurrentSnapshot));
             });
 
             //List<string> strList = new List<string>();
@@ -60,10 +67,11 @@ namespace FatalHaskell.Editor
 
         private ITrackingSpan FindTokenSpanAtPosition(ITrackingPoint point, ICompletionSession session)
         {
-            SnapshotPoint currentPoint = (session.TextView.Caret.Position.BufferPosition) - 1;
+            SnapshotPoint currentPoint = (session.TextView.Caret.Position.BufferPosition);
+            currentPoint = currentPoint.TranslateTo(m_textBuffer.CurrentSnapshot, PointTrackingMode.Negative);
             ITextStructureNavigator navigator = m_sourceProvider.NavigatorService.GetTextStructureNavigator(m_textBuffer);
             TextExtent extent = navigator.GetExtentOfWord(currentPoint);
-            return currentPoint.Snapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeInclusive);
+            return m_textBuffer.CurrentSnapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeInclusive);
         }
 
         private bool m_isDisposed;
