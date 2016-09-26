@@ -56,6 +56,13 @@ namespace FatalHaskell.Editor
                     case VSConstants.VSStd2KCmdID.CANCEL:
                         handled = Cancel();
                         break;
+                    case VSConstants.VSStd2KCmdID.TYPECHAR:
+                        char ch = GetTypeChar(pvaIn);
+                        if (ch == ' ')
+                        {
+                            Complete(false);
+                        }
+                        break;
                 }
             }
 
@@ -71,9 +78,13 @@ namespace FatalHaskell.Editor
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
                             char ch = GetTypeChar(pvaIn);
                             if (ch == ' ')
+                            {
                                 StartSession();
-                            else if (_currentSession != null)
+                            }
+                            else
+                            {
                                 Filter();
+                            }
                             break;
                         case VSConstants.VSStd2KCmdID.BACKSPACE:
                             Filter();
@@ -150,6 +161,7 @@ namespace FatalHaskell.Editor
             else
             {
                 _currentSession = Broker.GetSessions(TextView)[0];
+                _currentSession.Recalculate();
             }
             _currentSession.Dismissed += (sender, args) => _currentSession = null;
 
