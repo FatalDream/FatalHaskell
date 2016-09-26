@@ -184,6 +184,9 @@
     <Compile Include="Editor\Highlight\HighlightWordTag.cs" />
     <Compile Include="Editor\Highlight\HighlightWordTagger.cs" />
     <Compile Include="Editor\Highlight\HighlightWordTaggerProvider.cs" />
+    <Compile Include="Editor\Syntax\SyntaxTagger.cs" />
+    <Compile Include="Editor\Syntax\SyntaxTaggerProvider.cs" />
+    <Compile Include="Editor\Syntax\SyntaxToken.cs" />
     <Compile Include="Editor\Visual\ErrorSnapshotSpan.cs" />
     <Compile Include="Editor\Visual\ErrorTagger.cs" />
     <Compile Include="Editor\Visual\ErrorTaggerProvider.cs" />
@@ -300,9 +303,7 @@
     <Analyzer Include="..\..\packages\Microsoft.VisualStudio.ProjectSystem.Analyzers.15.0.183-pre\analyzers\Microsoft.VisualStudio.ProjectSystem.Analyzers.dll" />
     <Analyzer Include="..\..\packages\Microsoft.VisualStudio.Threading.Analyzers.15.0.20-pre\analyzers\Microsoft.VisualStudio.Threading.Analyzers.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Editor\Syntax\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- TODO: This copies the build authoring to a well-known location so that on the machine this project builds on,
