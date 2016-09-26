@@ -8,16 +8,17 @@ using FatalIDE.Core;
 using System.Diagnostics;
 using System.Timers;
 using System.Threading;
+using System.IO;
 
 namespace FatalHaskell.External
 {
     class InteroProcess
     {
-
+        private const String EOT = "hakjsdfhkajsfd";
 
         public static EitherSuccessOrError<InteroProcess, Error<String>> StartNew(String projectDir)
         {
-            InteroProcess process = new InteroProcess();
+            InteroProcess process = new InteroProcess(projectDir);
             return Communication.StartNewProcess(
                        "stack", "ghci --with-ghc intero --ghci-options -ferror-spans",
                        projectDir)
@@ -26,15 +27,16 @@ namespace FatalHaskell.External
                          process.Initialize(p);
                          p.ErrorDataReceived += (e, s) => process.OnReceiveError(s.Data);
                          p.BeginErrorReadLine();
-                         p.StandardInput.WriteLine(":set prompt >");
-                         process.ReadAll();
+                         p.StandardInput.WriteLine(":set prompt  \"" + EOT + "\"");
                          process.ReadAll();
                          return process;
                      });
         }
 
-        private InteroProcess()
-        {}
+        private InteroProcess(String projectDir)
+        {
+            this.projectDir = projectDir;
+        }
 
         Process currentProcess;
 
@@ -54,6 +56,7 @@ namespace FatalHaskell.External
 
         List<String> currentErrors;
         SemaphoreSlim requestSemaphore;
+        int curRequest = 0;
 
 
         public async Task<InteroResponse> GetResponse(String request)
@@ -63,6 +66,9 @@ namespace FatalHaskell.External
             await requestSemaphore.WaitAsync();
             try
             {
+                curRequest++;
+                LogLine("<<<< ", request);
+
                 currentErrors.Clear();
                 currentProcess.StandardInput.WriteLine(request);
                 List<String> output = ReadAll();
@@ -70,6 +76,8 @@ namespace FatalHaskell.External
                 await Task.Delay(TimeSpan.FromMilliseconds(50));
 
                 result = new InteroResponse(output, currentErrors);
+                LogLines("OUT >>>> ", output);
+                LogLines("ERR >>>> ", currentErrors);
             }
             finally
             {
@@ -85,10 +93,12 @@ namespace FatalHaskell.External
             while (true)
             {
                 char c = (char)currentProcess.StandardOutput.Read();
-                if (c == '>')
+                result += c;
+                if (result.EndsWith(EOT))
+                {
+                    result = result.Substring(0, result.Length - EOT.Length);
                     break;
-                else
-                    result += c;
+                }
             }
             return result.Split('\n').Select(s => s.TrimEnd('\r')).ToList();
         }
@@ -99,5 +109,22 @@ namespace FatalHaskell.External
         }
 
         #endregion
+
+        //-------- logging -------------
+        String projectDir;
+        private void LogLines(String prefix, List<String> xs)
+        {
+            String log = Path.Combine(projectDir, "intero.log");
+
+            foreach (var x in xs)
+            {
+                File.AppendAllText(log, curRequest + ": " + prefix + x + "\n");
+            }
+        }
+
+        private void LogLine(String prefix, String x)
+        {
+            LogLines(prefix, new String[]{ x }.ToList());
+        }
     }
 }

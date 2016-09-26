@@ -9,6 +9,7 @@ using System.IO;
 using System.Windows;
 using System.Diagnostics;
 using System.Timers;
+using System.Threading;
 
 namespace FatalHaskell.External
 {
@@ -79,7 +80,7 @@ namespace FatalHaskell.External
         private MirrorDirectories mirrorDirs;
         private Dictionary<String, String> filesToMirrorDirect;
         private Dictionary<String, String> filesToMirrorCorrect;
-        private Timer mirrorTimer;
+        private System.Timers.Timer mirrorTimer;
 
 
         private FHIntero Initialize(InteroProcess directProcess, InteroProcess correctProcess)
@@ -90,10 +91,11 @@ namespace FatalHaskell.External
             this.filesToMirrorDirect = new Dictionary<String, String>();
             this.filesToMirrorCorrect = new Dictionary<String, String>();
 
-            this.mirrorTimer = new Timer(500);
+            this.mirrorTimer = new System.Timers.Timer(500);
             this.mirrorTimer.Elapsed += (s, e) => UpdateDirectMirrorProject();
             this.mirrorTimer.Start();
-            
+
+            this.directMirrorSemaphore = new SemaphoreSlim(1, 1);
             
             return this;
         }
@@ -103,21 +105,53 @@ namespace FatalHaskell.External
         ///////////////////////////////////////////////////////////////////////
         #region Mirroring
         /////////////////
+
+        SemaphoreSlim directMirrorSemaphore;
+
         private async Task UpdateDirectMirrorProject()
         {
-            CopyMirrorFiles(mirrorDirs.original, mirrorDirs.direct, filesToMirrorDirect);
+            var task = directMirrorSemaphore.WaitAsync();
+            if (await Task.WhenAny(task, Task.Delay(5)) == task)
+            {
+                try
+                {
+                    CopyMirrorFiles(mirrorDirs.original, mirrorDirs.direct, filesToMirrorDirect);
+                }
+                finally
+                {
+                    directMirrorSemaphore.Release();
+                }
+            }
+            else
+            {
+                directMirrorSemaphore.Release();
+            }
+
+
             var r = await directProcess.GetResponse(":r");
             HandleErrors(r.error);
 
             if (r.error.Count == 0)
             {
-                SaveCorrectMirrorProject();
+                await SaveCorrectMirrorProject();
             }
+
         }
-        private void SaveCorrectMirrorProject()
+        private async Task SaveCorrectMirrorProject()
         {
-            CopyMirrorFiles(mirrorDirs.direct, mirrorDirs.correct, filesToMirrorCorrect);
-            correctProcess.GetResponse(":r");
+            if (filesToMirrorCorrect.Count > 0)
+            {
+                await directMirrorSemaphore.WaitAsync();
+                try
+                {
+                    CopyMirrorFiles(mirrorDirs.direct, mirrorDirs.correct, filesToMirrorCorrect);
+                    await correctProcess.GetResponse(":r");
+                }
+                finally
+                {
+                    directMirrorSemaphore.Release();
+                }
+            }
         }
 
         private Option<Success> CopyMirrorFiles(String sourceBaseDir, String targetBaseDir, Dictionary<String,String> filesToCopy)
@@ -164,7 +198,15 @@ namespace FatalHaskell.External
         public async Task<List<String>> GetCompletions(String relativeFilename, String curWord)
         {
             String filename = mirrorDirs.correct + relativeFilename;
-            var response = await correctProcess.GetResponse(":complete-at " + filename + " 1 1 1 1 \"" + curWord + "\"");
+            curWord = curWord.Trim();
+
+            // TODO: fix this crude re-sync hack
+            InteroResponse response;
+            do
+            {
+                response = await correctProcess.GetResponse(":complete-at " + filename + " 1 1 1 1 \"" + curWord + "\"");
+            } while (response.output[0].StartsWith("Ok, modules"));
+
             return response.output;
         }
 

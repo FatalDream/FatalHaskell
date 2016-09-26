@@ -93,6 +93,8 @@ namespace FatalHaskell.Editor
             if (_currentSession == null)
                 return;
 
+            _currentSession.Recalculate();
+            //_currentSession.Filter();
             _currentSession.SelectedCompletionSet.SelectBestMatch();
             _currentSession.SelectedCompletionSet.Recalculate();
         }
