@@ -69,8 +69,17 @@ namespace FatalHaskell.Editor
         {
             SnapshotPoint currentPoint = (session.TextView.Caret.Position.BufferPosition);
             currentPoint = currentPoint.TranslateTo(m_textBuffer.CurrentSnapshot, PointTrackingMode.Negative);
+
+            var line = currentPoint.GetContainingLine();
+            SnapshotPoint start = currentPoint;
+
+            while (start > line.Start && !char.IsWhiteSpace((start - 1).GetChar()))
+            {
+                start -= 1;
+            }
+
             ITextStructureNavigator navigator = m_sourceProvider.NavigatorService.GetTextStructureNavigator(m_textBuffer);
-            TextExtent extent = navigator.GetExtentOfWord(currentPoint);
+            TextExtent extent = navigator.GetExtentOfWord(start);
             return m_textBuffer.CurrentSnapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeInclusive);
         }
 
