@@ -94,8 +94,6 @@ namespace FatalHaskell.External
             this.mirrorTimer = new System.Timers.Timer(500);
             this.mirrorTimer.Elapsed += (s, e) => UpdateDirectMirrorProject();
             this.mirrorTimer.Start();
-
-            this.directMirrorSemaphore = new SemaphoreSlim(1, 1);
             
             return this;
         }
@@ -106,28 +104,10 @@ namespace FatalHaskell.External
         #region Mirroring
         /////////////////
 
-        SemaphoreSlim directMirrorSemaphore;
-
         private async Task UpdateDirectMirrorProject()
         {
-            var task = directMirrorSemaphore.WaitAsync();
-            if (await Task.WhenAny(task, Task.Delay(5)) == task)
-            {
-                try
-                {
-                    CopyMirrorFiles(mirrorDirs.original, mirrorDirs.direct, filesToMirrorDirect);
-                }
-                finally
-                {
-                    directMirrorSemaphore.Release();
-                }
-            }
-            else
-            {
-                directMirrorSemaphore.Release();
-            }
-
-
+            WriteMirrorFiles(mirrorDirs.direct, filesToMirrorDirect);
+    
             var r = await directProcess.GetResponse(":r");
             HandleErrors(r.error);
 
@@ -141,20 +121,12 @@ namespace FatalHaskell.External
         {
             if (filesToMirrorCorrect.Count > 0)
             {
-                await directMirrorSemaphore.WaitAsync();
-                try
-                {
-                    CopyMirrorFiles(mirrorDirs.direct, mirrorDirs.correct, filesToMirrorCorrect);
-                    await correctProcess.GetResponse(":r");
-                }
-                finally
-                {
-                    directMirrorSemaphore.Release();
-                }
+                WriteMirrorFiles(mirrorDirs.correct, filesToMirrorCorrect);
+                await correctProcess.GetResponse(":r");
             }
         }
 
-        private Option<Success> CopyMirrorFiles(String sourceBaseDir, String targetBaseDir, Dictionary<String,String> filesToCopy)
+        private static Option<Success> WriteMirrorFiles(String targetBaseDir, Dictionary<String,String> filesToCopy)
         {
             lock (filesToCopy)
             {
@@ -163,7 +135,7 @@ namespace FatalHaskell.External
 
                     foreach (var pathDiff_And_File in filesToCopy)
                     {
-                        String mirrorFile = mirrorDirs.direct + pathDiff_And_File.Key;
+                        String mirrorFile = targetBaseDir + pathDiff_And_File.Key;
                         File.WriteAllText(mirrorFile, pathDiff_And_File.Value);
                     }
                     filesToCopy.Clear();
