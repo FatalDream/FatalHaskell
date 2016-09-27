@@ -53,7 +53,7 @@ namespace FatalHaskell.Editor
             }
 
 
-            return FHIntero.Instance(fileName).Unify(
+            return Intero.Instance(fileName).Unify(
                 intero =>
                 {
                     ITagAggregator<FRErrorTag> asmTagAggregator = _aggregatorFactory.CreateTagAggregator<FRErrorTag>(buffer);

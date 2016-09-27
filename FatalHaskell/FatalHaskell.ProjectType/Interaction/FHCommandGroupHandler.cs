@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Windows;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
-using FatalHaskell.FHBuildSystem;
+using FatalHaskell.BuildSystem;
 using System.ComponentModel.Composition;
 
 namespace FatalHaskell.Interaction

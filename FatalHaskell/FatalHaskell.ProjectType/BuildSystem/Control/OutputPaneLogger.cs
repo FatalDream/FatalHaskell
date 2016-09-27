@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio;
 
-namespace FatalHaskell.FHBuildSystem
+namespace FatalHaskell.BuildSystem
 {
     public class OutputPaneLogger : ILogger
     {

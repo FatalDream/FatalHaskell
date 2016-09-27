@@ -19,10 +19,10 @@ namespace FatalHaskell.Editor
         private FHCompletionSourceProvider m_sourceProvider;
         private ITextBuffer m_textBuffer;
         private List<Completion> m_compList;
-        private FHIntero intero;
+        private Intero intero;
         private readonly String relativeFilename;
 
-        public FHCompletionSource(FHCompletionSourceProvider sourceProvider, ITextBuffer textBuffer, FHIntero intero, String relativeFilename)
+        public FHCompletionSource(FHCompletionSourceProvider sourceProvider, ITextBuffer textBuffer, Intero intero, String relativeFilename)
         {
             m_sourceProvider = sourceProvider;
             m_textBuffer = textBuffer;

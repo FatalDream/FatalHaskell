@@ -16,7 +16,7 @@ namespace FatalHaskell.Editor
         ITextBuffer _buffer;
         SyntaxTokenFactory tokenFactory;
 
-        internal SyntaxTagger(ITextBuffer buffer, FHIntero intero, IClassificationTypeRegistryService registry)
+        internal SyntaxTagger(ITextBuffer buffer, Intero intero, IClassificationTypeRegistryService registry)
         {
             _buffer = buffer;
             tokenFactory = new SyntaxTokenFactory(intero, registry);

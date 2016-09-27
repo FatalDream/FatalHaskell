@@ -12,9 +12,9 @@ namespace FatalHaskell.Editor
     class SyntaxTokenFactory
     {
         private IClassificationTypeRegistryService registry;
-        private FHIntero intero;
+        private Intero intero;
 
-        public SyntaxTokenFactory(FHIntero intero, IClassificationTypeRegistryService registry)
+        public SyntaxTokenFactory(Intero intero, IClassificationTypeRegistryService registry)
         {
             this.intero = intero;
             this.registry = registry;

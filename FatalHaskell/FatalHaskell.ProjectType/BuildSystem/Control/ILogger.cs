@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FatalHaskell.FHBuildSystem
+namespace FatalHaskell.BuildSystem
 {
     interface ILogger
     {

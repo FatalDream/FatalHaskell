@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bearded.Monads;
 using FatalIDE.Core;
-using FatalHaskell.FHBuildSystem;
+using FatalHaskell.BuildSystem;
 
 namespace FatalHaskell.External
 {

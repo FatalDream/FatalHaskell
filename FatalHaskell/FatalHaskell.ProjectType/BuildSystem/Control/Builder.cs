@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Bearded.Monads;
 
-namespace FatalHaskell.FHBuildSystem
+namespace FatalHaskell.BuildSystem
 {
 
     [Export(typeof(IBuilder))]

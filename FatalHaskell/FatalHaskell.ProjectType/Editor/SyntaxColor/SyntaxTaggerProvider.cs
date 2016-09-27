@@ -36,7 +36,7 @@ namespace FatalHaskell.Editor
             }
 
 
-            return FHIntero.Instance(fileName).Unify(
+            return Intero.Instance(fileName).Unify(
                 intero =>
                 {
                     return new SyntaxTagger(buffer, intero, registry) as ITagger<T>;

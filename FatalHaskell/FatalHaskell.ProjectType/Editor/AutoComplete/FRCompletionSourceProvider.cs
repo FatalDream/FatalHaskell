@@ -32,7 +32,7 @@ namespace FatalHaskell.Editor
         [Import]
         ITextDocumentFactoryService documentFactoryService;
         
-        public Option<FHIntero> intero;
+        public Option<Intero> intero;
         
         [ImportingConstructor]
         FHCompletionSourceProvider(SVsServiceProvider ServiceProvider)
@@ -40,11 +40,11 @@ namespace FatalHaskell.Editor
             DTE dte = (DTE)ServiceProvider.GetService(typeof(DTE));
             String mainDir = Path.GetDirectoryName(dte.ActiveDocument.FullName);
 
-            intero = FHIntero.Instance(mainDir).Unify(
-                i   => Option<FHIntero>.Return(i),
+            intero = Intero.Instance(mainDir).Unify(
+                i   => Option<Intero>.Return(i),
                 err => {
                     MessageBox.Show(err.ToString());
-                    return Option<FHIntero>.None; 
+                    return Option<Intero>.None; 
                 });
         }
 

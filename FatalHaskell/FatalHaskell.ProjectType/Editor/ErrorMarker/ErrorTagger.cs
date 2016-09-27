@@ -26,7 +26,7 @@ namespace FatalHaskell.Editor
         private ErrorTaggerProvider _provider;
         private readonly String relativeFilename;
         private ErrorContainer _errorContainer;
-        private FHIntero intero;
+        private Intero intero;
         
 
         internal ErrorTagger(
@@ -35,7 +35,7 @@ namespace FatalHaskell.Editor
                 String filename,
                 ITagAggregator<ErrorTag> asmTagAggregator,
                 ErrorTaggerProvider provider,
-                FHIntero intero)
+                Intero intero)
         {
             this._view = view;
             this._sourceBuffer = buffer;

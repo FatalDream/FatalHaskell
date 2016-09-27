@@ -13,15 +13,15 @@ using System.Threading;
 
 namespace FatalHaskell.External
 {
-    class FHIntero
+    class Intero
     {
         ///////////////////////////////////////////////////////////////////////
         #region Constructor
         ///////////////////
 
-        private static FHIntero Singleton = null;
+        private static Intero Singleton = null;
 
-        public static EitherSuccessOrError<FHIntero, Error<String>> Instance(String fileInProject)
+        public static EitherSuccessOrError<Intero, Error<String>> Instance(String fileInProject)
         {
             if (Singleton == null)
             {
@@ -39,7 +39,7 @@ namespace FatalHaskell.External
                 ProjectTree.CopyDirectoryRec(mirrorDirs.original, mirrorDirs.correct);
 
                 // create object
-                FHIntero intero = new FHIntero(mirrorDirs);
+                Intero intero = new Intero(mirrorDirs);
 
                 // start process
                 var directProcess = InteroProcess.StartNew(mirrorDirs.direct);
@@ -53,11 +53,11 @@ namespace FatalHaskell.External
             }
             else
             {
-                return EitherSuccessOrError<FHIntero, Error<String>>.Create(Singleton);
+                return EitherSuccessOrError<Intero, Error<String>>.Create(Singleton);
             }
         }
 
-        private FHIntero(MirrorDirectories mirrorDirs)
+        private Intero(MirrorDirectories mirrorDirs)
         {
             this.Errors = new ErrorContainer(mirrorDirs.direct);
             this.mirrorDirs = mirrorDirs;
@@ -82,7 +82,7 @@ namespace FatalHaskell.External
         private System.Timers.Timer mirrorTimer;
 
 
-        private FHIntero Initialize(InteroProcess directProcess, InteroProcess correctProcess)
+        private Intero Initialize(InteroProcess directProcess, InteroProcess correctProcess)
         {
             this.directProcess = directProcess;
             this.correctProcess = correctProcess;
