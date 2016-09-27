@@ -7,18 +7,19 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using System.Linq;
+using FatalHaskell.External;
 
 namespace FatalHaskell.Editor
 {
     class SyntaxTagger : ITagger<ClassificationTag>
     {
         ITextBuffer _buffer;
-        IClassificationTypeRegistryService ClassificationTypeRegistryService;
+        SyntaxTokenFactory tokenFactory;
 
-        internal SyntaxTagger(ITextBuffer buffer, IClassificationTypeRegistryService regService)
+        internal SyntaxTagger(ITextBuffer buffer, FHIntero intero, IClassificationTypeRegistryService registry)
         {
             _buffer = buffer;
-            ClassificationTypeRegistryService = regService;
+            tokenFactory = new SyntaxTokenFactory(intero, registry);
         }
 
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged
@@ -45,11 +46,7 @@ namespace FatalHaskell.Editor
                     if (startWord != endWord)
                     {
                         var wordSpan = new SnapshotSpan(startWord, endWord);
-                        if (Char.IsUpper(wordSpan.GetText().First()))
-                        {
-                            yield return new TagSpan<ClassificationTag>(wordSpan,
-                                new ClassificationTag(ClassificationTypeRegistryService.GetClassificationType("string")));
-                        }
+                        yield return tokenFactory.Create(wordSpan).GetTagSpan();
                     }
                 }
                 

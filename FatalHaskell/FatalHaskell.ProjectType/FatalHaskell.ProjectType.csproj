@@ -184,9 +184,11 @@
     <Compile Include="Editor\Highlight\HighlightWordTag.cs" />
     <Compile Include="Editor\Highlight\HighlightWordTagger.cs" />
     <Compile Include="Editor\Highlight\HighlightWordTaggerProvider.cs" />
+    <Compile Include="Editor\Syntax\ClassificationFormats.cs" />
     <Compile Include="Editor\Syntax\SyntaxTagger.cs" />
     <Compile Include="Editor\Syntax\SyntaxTaggerProvider.cs" />
     <Compile Include="Editor\Syntax\SyntaxToken.cs" />
+    <Compile Include="Editor\Syntax\SyntaxTokenFactory.cs" />
     <Compile Include="Editor\Visual\ErrorSnapshotSpan.cs" />
     <Compile Include="Editor\Visual\ErrorTagger.cs" />
     <Compile Include="Editor\Visual\ErrorTaggerProvider.cs" />

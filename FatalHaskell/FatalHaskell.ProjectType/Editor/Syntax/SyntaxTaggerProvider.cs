@@ -7,6 +7,9 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.ProjectSystem;
+using FatalHaskell.External;
+using Bearded.Monads;
+using System.Windows;
 
 namespace FatalHaskell.Editor
 {
@@ -18,11 +21,32 @@ namespace FatalHaskell.Editor
     {
 
         [Import]
-        internal IClassificationTypeRegistryService ClassificationTypeRegistryService { get; set; }
+        internal IClassificationTypeRegistryService registry { get; set; }
+
+        [Import]
+        ITextDocumentFactoryService documentFactoryService;
 
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
-            return new SyntaxTagger(buffer, ClassificationTypeRegistryService) as ITagger<T>;
+            ITextDocument curDoc = null;
+            String fileName = null;
+            if (documentFactoryService.TryGetTextDocument(buffer, out curDoc))
+            {
+                fileName = curDoc.FilePath;
+            }
+
+
+            return FHIntero.Instance(fileName).Unify(
+                intero =>
+                {
+                    return new SyntaxTagger(buffer, intero, registry) as ITagger<T>;
+                },
+                error =>
+                {
+                    MessageBox.Show(error.ToString());
+                    return null;
+                }
+                );
         }
     }
 }

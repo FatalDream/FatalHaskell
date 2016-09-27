@@ -64,7 +64,6 @@ namespace FatalHaskell.External
         }
         #endregion
 
-
         ///////////////////////////////////////////////////////////////////////
         #region Init
         /////////////
@@ -94,6 +93,8 @@ namespace FatalHaskell.External
             this.mirrorTimer = new System.Timers.Timer(500);
             this.mirrorTimer.Elapsed += (s, e) => UpdateDirectMirrorProject();
             this.mirrorTimer.Start();
+
+            InitializeInsights();
             
             return this;
         }
@@ -199,6 +200,29 @@ namespace FatalHaskell.External
             }
 
             ErrorsChanged?.Invoke(Errors);
+        }
+
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////
+        #region Insights
+        /////////////////
+
+        List<String> Keywords;
+
+        void InitializeInsights()
+        {
+            Keywords = new String[]
+            {
+                "module", "where", "import",
+                "if", "then", "else", "do",
+                "newtype", "class", "instance"
+            }.ToList();
+        }
+
+        public IEnumerable<String> GetKeywords()
+        {
+            return Keywords;
         }
 
         #endregion
