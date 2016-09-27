@@ -17,7 +17,7 @@ namespace FatalHaskell.External
             //Match mCol = Regex.Match(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):");
 
             Func<Option<InteroError>> matchSingleCol =
-                () => MatchError(s, "(.+?):([0-9]+):([0-9]+): (error):")
+                () => s.MatchRegex("(.+?):([0-9]+):([0-9]+): (error):")
                 .SelectMany(singleCol =>
                 {
                     int line = int.Parse(singleCol.Groups[2].Value);
@@ -29,7 +29,7 @@ namespace FatalHaskell.External
 
 
             Func<Option<InteroError>> matchMultiCol =
-                () => MatchError(s, "(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):")
+                () => s.MatchRegex("(.+?):([0-9]+):([0-9]+)-([0-9]+): (error):")
                 .SelectMany(multiCol =>
                 {
                     int line     = int.Parse(multiCol.Groups[2].Value);
@@ -44,14 +44,7 @@ namespace FatalHaskell.External
 
         }
 
-        private static Option<Match> MatchError(String input, String r)
-        {
-            Match m = Regex.Match(input, r);
-            if (m.Success)
-                return m;
-            else
-                return Option<Match>.None;
-        }
+        
 
         public List<InteroError> AppendOrCreate(String line, String projectPath)
         {
@@ -76,13 +69,6 @@ namespace FatalHaskell.External
                 return result;
             }
         }
-
-        //private InteroError(int PosLow, int PosHigh, String message)
-        //{
-        //    this.PosLow = PosLow;
-        //    this.PosHigh = PosHigh;
-        //    this.message = message;
-        //}
 
         private InteroError(String path, int line, int colStart, int colEnd)
         {
