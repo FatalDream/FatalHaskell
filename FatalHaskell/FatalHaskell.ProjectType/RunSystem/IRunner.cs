@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Bearded.Monads;
 using FatalIDE.Core;
 
-namespace FatalHaskell.BuildSystem
+namespace FatalHaskell.RunSystem
 {
-    interface IBuilder
+    interface IRunner
     {
-        Task<EitherSuccessOrError<Success,Error<String>>> Build();
+        EitherSuccessOrError<Success,Error<String>> Run();
     }
 }

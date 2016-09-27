@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Bearded.Monads;
+using FatalIDE.Core;
 
 namespace FatalHaskell.BuildSystem
 {
@@ -27,12 +28,11 @@ namespace FatalHaskell.BuildSystem
             projectPath = Path.GetDirectoryName(full);
         }
 
-        public void Build()
+        public async Task<EitherSuccessOrError<Success,Error<String>>> Build()
         {
+            return await
             HaskellStack.Instance()
-                .WhenSuccess(stack => stack.Build(projectPath, new OutputPaneLogger()));
-
-            MessageBox.Show("Builder called!");
+                .SelectAsync(stack => stack.Build(projectPath, new OutputPaneLogger()));
         }
     }
 }

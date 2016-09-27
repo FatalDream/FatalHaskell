@@ -29,6 +29,8 @@ namespace FatalIDE.Core
             }
         }
 
+        public IEnumerable<String> Lines() => raw.Split('\n').Select(s => s.TrimEnd('\r'));
+
         public String Raw() => raw;
 
         private String raw;

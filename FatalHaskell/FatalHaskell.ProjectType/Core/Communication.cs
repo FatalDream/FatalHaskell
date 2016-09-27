@@ -58,9 +58,10 @@ namespace FatalIDE.Core
                 p.Start();
 
                 p.OutputDataReceived += (o, a) => { if (a.Data != null) StdHandler(a.Data); };
-                p.BeginErrorReadLine();
+                p.BeginOutputReadLine();
                 p.ErrorDataReceived += (o, a) => { if (a.Data != null) ErrHandler(a.Data); };
                 p.BeginErrorReadLine();
+                p.EnableRaisingEvents = true;
                 p.Exited += (s, e) => ExitHandler();
 
                 return EitherSuccessOrError<Action<String>, Error<String>>.Create(s => p.StandardInput.WriteLine(s));

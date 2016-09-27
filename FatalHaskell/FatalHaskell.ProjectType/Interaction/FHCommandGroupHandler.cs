@@ -5,6 +5,10 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
 using FatalHaskell.BuildSystem;
 using System.ComponentModel.Composition;
+using System.Threading.Tasks;
+using FatalHaskell.RunSystem;
+using Bearded.Monads;
+using FatalIDE.Core;
 
 namespace FatalHaskell.Interaction
 {
@@ -15,11 +19,14 @@ namespace FatalHaskell.Interaction
     // TODO: Replace the Guid specified in the ExportCommandGroup attribute with the group id of your commands
     [ExportCommandGroup(VSConstants.CMDSETID.StandardCommandSet97_string)]
     [AppliesTo(MyUnconfiguredProject.UniqueCapability)]
-    internal class FHCommandGroupHandler : ICommandGroupHandler
+    internal class FHCommandGroupHandler : IAsyncCommandGroupHandler
     {
 
         [Import(typeof(IBuilder))]
         IBuilder Builder;
+
+        [Import(typeof(IRunner))]
+        IRunner Runner;
 
         /// <summary>
         /// Check if a specific command is supported and enabled.
@@ -31,7 +38,7 @@ namespace FatalHaskell.Interaction
         /// <param name="commandText">The default caption of the command that is displayed to the user.  <c>null</c> to allow the default caption to be used.</param>
         /// <param name="progressiveStatus">The query result thus far (as default, or as handed off from previous handler).</param>
         /// <returns>A value that describes how this command may be handled.</returns>
-        public CommandStatusResult GetCommandStatus(IImmutableSet<IProjectTree> nodes, long commandId, bool focused, string commandText, CommandStatus progressiveStatus)
+        public async Task<CommandStatusResult> GetCommandStatusAsync(IImmutableSet<IProjectTree> nodes, long commandId, bool focused, string commandText, CommandStatus progressiveStatus)
         {
             CommandStatusResult result = CommandStatusResult.Unhandled;
 
@@ -64,7 +71,7 @@ namespace FatalHaskell.Interaction
         /// <param name="variantArgIn">Pointer to a VARIANTARG structure containing input arguments. Can be NULL</param>
         /// <param name="variantArgOut">VARIANTARG structure to receive command output. Can be NULL.</param>
         /// <returns>true if the extension has handled execution for this command and should prevent other handlers from processing the command. false otherwise.</returns>
-        public bool TryHandleCommand(IImmutableSet<IProjectTree> nodes, long commandId, bool focused, long commandExecuteOptions, IntPtr variantArgIn, IntPtr variantArgOut)
+        public async Task<bool> TryHandleCommandAsync(IImmutableSet<IProjectTree> nodes, long commandId, bool focused, long commandExecuteOptions, IntPtr variantArgIn, IntPtr variantArgOut)
         {
             bool result = false;
 
@@ -78,8 +85,10 @@ namespace FatalHaskell.Interaction
                     break;
 
                 case VSConstants.VSStd97CmdID.Start:
-                    MessageBox.Show("Started!");
-                    Builder.Build();
+                    var success = (await Builder.Build())
+                        .Select(_ => Runner.Run())
+                        .WhenError(err => MessageBox.Show(err.ToString()));
+
                     result = true;
                     break;
             }

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using Bearded.Monads;
 using System;
+using System.Linq;
 
 namespace FatalIDE.Core
 {
-    public static class ListMonad
+    public static class FListExtension
     {
         public static List<A> ToList<A>(this Option<A> x)
         {
@@ -25,6 +26,11 @@ namespace FatalIDE.Core
                 l.Add(n());
             }
             return l;
+        }
+
+        public static IEnumerable<B> FilterMap<A,B>(this IEnumerable<A> xs, Func<A,Option<B>> f)
+        {
+            return xs.SelectMany(x => f(x).ToList());
         }
     }
 }

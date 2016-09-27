@@ -171,8 +171,9 @@
     <Compile Include="Core\DictionaryExtension.cs" />
     <Compile Include="Core\FEitherExtension.cs" />
     <Compile Include="Core\Error.cs" />
-    <Compile Include="Core\ListMonad.cs" />
-    <Compile Include="Core\OptionExtension.cs" />
+    <Compile Include="Core\FStringExtension.cs" />
+    <Compile Include="Core\FListExtension.cs" />
+    <Compile Include="Core\FOptionExtension.cs" />
     <Compile Include="Core\ProjectTree.cs" />
     <Compile Include="Core\ProcessOutput.cs" />
     <Compile Include="Core\Success.cs" />
@@ -195,7 +196,7 @@
     <Compile Include="Editor\ErrorMarker\FRErrorTag.cs" />
     <Compile Include="External\ErrorContainer.cs" />
     <Compile Include="External\Intero\Intero.cs" />
-    <Compile Include="External\HaskellStack.cs" />
+    <Compile Include="External\Stack\HaskellStack.cs" />
     <Compile Include="External\Intero\InteroError.cs" />
     <Compile Include="External\Intero\InteroProcess.cs" />
     <Compile Include="External\Intero\InteroResponse.cs" />
@@ -204,10 +205,13 @@
     <Compile Include="BuildSystem\Control\IBuilder.cs" />
     <Compile Include="BuildSystem\Control\ILogger.cs" />
     <Compile Include="BuildSystem\Control\OutputPaneLogger.cs" />
+    <Compile Include="External\Stack\StackTarget.cs" />
     <Compile Include="Interaction\FHCommandGroupHandler.cs" />
     <Compile Include="MyConfiguredProject.cs" />
     <Compile Include="MyUnconfiguredProject.cs" />
     <Compile Include="ProjectProperties.cs" />
+    <Compile Include="RunSystem\IRunner.cs" />
+    <Compile Include="RunSystem\StackRunner.cs" />
     <Compile Include="VsPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

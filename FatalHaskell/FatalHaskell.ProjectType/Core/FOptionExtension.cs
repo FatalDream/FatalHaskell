@@ -7,7 +7,7 @@ using Bearded.Monads;
 
 namespace FatalIDE.Core
 {
-    public static class OptionExtension
+    public static class FOptionExtension
     {
         public static B Unify<A,B>(this Option<A> self, Func<A,B> someF, Func<B> noneF)
         {
@@ -23,6 +23,14 @@ namespace FatalIDE.Core
             return self.Unify(
                 a  => a,
                 () => f());
+        }
+
+        public static Task<Option<B>> SelectAsync<A,B>(this Option<A> self, Func<A, Task<B>> f)
+        {
+            return Unify<A, Task<Option<B>>>(
+                self,
+                async a => await f(a),
+                () => Task.FromResult(Option<B>.None));
         }
     }
 }
